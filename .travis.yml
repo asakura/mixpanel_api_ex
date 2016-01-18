@@ -3,7 +3,7 @@ elixir:
   - 1.2.1
 otp_release:
   - 18.2.1
-sudo: false # to use faster container based build environment
+sudo: false
 after_script:
   - mix deps.get --only docs
   - MIX_ENV=docs mix inch.report
