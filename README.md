@@ -11,21 +11,21 @@ Elixir client for the Mixpanel API.
 
 The package can be installed as:
 
-  1. Add mixpanel to your list of dependencies in `mix.exs`:
+  1. Add `mixpanel_api_ex` to your list of dependencies in `mix.exs`:
 
         def deps do
-          [{:mixpanel, "~> 0.8.0"}]
+          [{:mixpanel_api_ex, "~> 0.8.0"}]
         end
 
-  2. Ensure mixpanel is started before your application:
+  2. Ensure `mixpanel_api_ex` is started before your application:
 
         def application do
-          [applications: [:mixpanel]]
+          [applications: [:mixpanel_api_ex]]
         end
 
-  3. Ensure your mixpanel token was placed in config file:
+  3. Ensure your Mixpanel token was placed in config file:
   
-        config :mixpanel, token: "<Put API token here>"
+        config :mixpanel_api_ex, token: "<Put API token here>"
 
 ## Usage
 
