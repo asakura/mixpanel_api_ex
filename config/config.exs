@@ -1,3 +1,5 @@
 use Mix.Config
 
-config :mixpanel_api_ex, token: ""
+if Mix.env == :test do
+  config :mixpanel_api_ex, token: ""
+end
