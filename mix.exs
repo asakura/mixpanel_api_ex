@@ -47,6 +47,6 @@ defmodule Mixpanel.Mixfile do
      {:mock, "~> 0.1.1", only: :test},
      {:ex_doc, "~> 0.10", only: :docs},
      {:earmark, "~> 0.1", only: :docs},
-     {:inch_ex, only: :docs}]
+     {:inch_ex, ">= 0.0.0", only: :docs}]
   end
 end
