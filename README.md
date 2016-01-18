@@ -13,32 +13,41 @@ The package can be installed as:
 
   1. Add `mixpanel_api_ex` to your list of dependencies in `mix.exs`:
 
-        def deps do
-          [{:mixpanel_api_ex, "~> 0.8.0"}]
-        end
+  ```elixir
+  def deps do
+    [{:mixpanel_api_ex, "~> 0.8.0"}]
+  end
+  ```
 
   2. Ensure `mixpanel_api_ex` is started before your application:
 
-        def application do
-          [applications: [:mixpanel_api_ex]]
-        end
+  ```elixir
+  def application do
+    [applications: [:mixpanel_api_ex]]
+  end
+  ```
 
   3. Ensure your Mixpanel token was placed in config file:
-  
-        config :mixpanel_api_ex, token: "<Put API token here>"
+  ```elixir
+  config :mixpanel_api_ex, token: "<Put API token here>"
+  ```
 
 ## Usage
 
   1. Track events with `Mixpanel.track/3` function:
-  
-        iex> Mixpanel.track("Signed up", %{"Referred By" => "friend"}, distinct_id: "13793")
-        :ok
-        iex> Mixpanel.track("Level Complete", %{"Level Number" => 9}, distinct_id: "13793", time: 1358208000, ip: "203.0.113.9")
-        :ok
-        
+
+  ```elixir
+  iex> Mixpanel.track("Signed up", %{"Referred By" => "friend"}, distinct_id: "13793")
+  :ok
+  iex> Mixpanel.track("Level Complete", %{"Level Number" => 9}, distinct_id: "13793", time: 1358208000, ip: "203.0.113.9")
+  :ok
+  ```
+
   2. Track profile updates with `Mixpanel.engage/4` function:
   
-        iex> Mixpanel.engage("13793", "$set", %{"Address" => "1313 Mockingbird Lane"}, ip: "123.123.123.123")
-        :ok
-        iex> Mixpanel.engage("13793", "$set", %{"Address" => "1313 Mockingbird Lane", "Birthday" => "1948-01-01"}, ip: "123.123.123.123")
-        :ok
+  ```elixir
+  iex> Mixpanel.engage("13793", "$set", %{"Address" => "1313 Mockingbird Lane"}, ip: "123.123.123.123")
+  :ok
+  iex> Mixpanel.engage("13793", "$set", %{"Address" => "1313 Mockingbird Lane", "Birthday" => "1948-01-01"}, ip: "123.123.123.123")
+  :ok
+  ```
