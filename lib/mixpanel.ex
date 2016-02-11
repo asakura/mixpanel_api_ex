@@ -45,7 +45,7 @@ defmodule Mixpanel do
   defp track_put_distinct_id(properties, distinct_id), do: Map.put(properties, :distinct_id, distinct_id)
 
   defp track_put_ip(properties, nil), do: properties
-  defp track_put_ip(properties, ip), do: Map.put(properties, :ip, ip)
+  defp track_put_ip(properties, ip), do: Map.put(properties, :ip, convert_ip(ip))
 
   @doc """
   Stores a user profile
@@ -77,7 +77,7 @@ defmodule Mixpanel do
   end
 
   defp engage_put_ip(event, nil), do: event
-  defp engage_put_ip(event, ip), do: Map.put(event, :"$ip", ip)
+  defp engage_put_ip(event, ip), do: Map.put(event, :"$ip", convert_ip(ip))
 
   defp engage_put_time(event, nil), do: event
   defp engage_put_time(event, {mega_secs, secs, _ms}), do: engage_put_time(event, mega_secs * 10_000 + secs)
@@ -85,4 +85,7 @@ defmodule Mixpanel do
 
   defp engage_put_ignore_time(event, true), do: Map.put(event, :"$ignore_time", "true")
   defp engage_put_ignore_time(event, _), do: event
+
+  defp convert_ip({a, b, c, d}), do: "#{a}.#{b}.#{c}.#{d}"
+  defp convert_ip(ip), do: ip
 end
