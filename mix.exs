@@ -1,7 +1,7 @@
 defmodule Mixpanel.Mixfile do
   use Mix.Project
 
-  @version "0.8.1"
+  @version "0.8.2"
 
   def project do
     [app: :mixpanel_api_ex,
@@ -19,7 +19,7 @@ defmodule Mixpanel.Mixfile do
      name: "Mixpanel API",
      docs: [extras: ["README.md", "CHANGELOG.md"],
             source_ref: "v#{@version}", main: "Mixpanel",
-            source_url: "https://github.com/asakura/mixpanel_api_ex"]]
+            source_url: "https://github.com/agevio/mixpanel_api_ex"]]
   end
 
   def description do
@@ -29,7 +29,7 @@ defmodule Mixpanel.Mixfile do
   def package do
     [maintainers: ["Mikalai Seva"],
      licenses: ["The MIT License"],
-     links: %{"GitHub" => "https://github.com/asakura/mixpanel_api_ex"},
+     links: %{"GitHub" => "https://github.com/agevio/mixpanel_api_ex"},
      files: ~w(mix.exs README.md CHANGELOG.md lib)]
   end
 
