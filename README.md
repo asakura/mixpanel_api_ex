@@ -1,6 +1,6 @@
 # Mixpanel
 
-[![Build Status](https://travis-ci.org/agevio/mixpanel_api_ex.svg?branch=master)](https://travis-ci.org/asakura/mixpanel_api_ex)
+[![Build Status](https://travis-ci.org/agevio/mixpanel_api_ex.svg?branch=master)](https://travis-ci.org/agevio/mixpanel_api_ex)
 [![Hex.pm](https://img.shields.io/hexpm/v/mixpanel_api_ex.svg?style=flat-square)](https://hex.pm/packages/mixpanel_api_ex)
 [![Hex.pm](https://img.shields.io/hexpm/dt/mixpanel_api_ex.svg?style=flat-square)](https://hex.pm/packages/mixpanel_api_ex)
 [![Inline docs](http://inch-ci.org/github/agevio/mixpanel_api_ex.svg?branch=master&style=flat)](http://inch-ci.org/github/agevio/mixpanel_api_ex)
