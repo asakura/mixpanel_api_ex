@@ -39,8 +39,8 @@ defmodule Mixpanel.Mixfile do
   end
 
   defp deps do
-    [{:httpoison, "~> 0.8.0"},
-     {:poison, "~> 1.5.2"},
+    [{:httpoison, "~> 0.9"},
+     {:poison, "~> 2.0"},
      {:credo, "~> 0.2", only: :dev},
      {:dogma, "~> 0.0", only: :dev},
      {:dialyxir, "~> 0.3", only: :dev},
