@@ -45,8 +45,8 @@ defmodule Mixpanel.Mixfile do
      {:dogma, "~> 0.0", only: :dev},
      {:dialyxir, "~> 0.3", only: :dev},
      {:mock, "~> 0.1.1", only: :test},
-     {:ex_doc, "~> 0.10", only: :docs},
-     {:earmark, "~> 0.1", only: :docs},
-     {:inch_ex, ">= 0.0.0", only: :docs}]
+     {:ex_doc, ">= 0.0.0", only: :dev},
+     {:earmark, "~> 1.0", only: :dev},
+     {:inch_ex, ">= 0.0.0", only: :dev}]
   end
 end
