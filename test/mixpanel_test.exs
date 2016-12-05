@@ -4,7 +4,7 @@ defmodule MixpanelTest do
   import Mock
 
   defp mock do
-    [get: fn _, _, _ -> {:ok, %HTTPoison.Response{status_code: 200, body: '1'}} end]
+    [get: fn _, _, _ -> {:ok, %HTTPoison.Response{status_code: 200, body: "1"}} end]
   end
 
   setup do

@@ -46,10 +46,10 @@ defmodule Mixpanel.Client do
     |> :base64.encode
 
     case HTTPoison.get(@track_endpoint, [], params: [data: data]) do
-      {:ok, %HTTPoison.Response{status_code: 200, body: '1'}} ->
+      {:ok, %HTTPoison.Response{status_code: 200, body: "1"}} ->
         :ok
-      _ ->
-        Logger.warn("Problem tracking Mixpanel event: #{inspect event}, #{inspect properties}")
+      other ->
+        Logger.warn("Problem tracking Mixpanel event: #{inspect event}, #{inspect properties} Got: #{inspect other}")
     end
 
     {:noreply, state}
@@ -62,10 +62,10 @@ defmodule Mixpanel.Client do
     |> :base64.encode
 
     case HTTPoison.get(@engage_endpoint, [], params: [data: data]) do
-      {:ok, %HTTPoison.Response{status_code: 200, body: '1'}} ->
+      {:ok, %HTTPoison.Response{status_code: 200, body: "1"}} ->
         :ok
-      _ ->
-        Logger.warn("Problem tracking Mixpanel profile update: #{inspect event}")
+      other ->
+        Logger.warn("Problem tracking Mixpanel profile update: #{inspect event} Got: #{inspect other}")
     end
 
     {:noreply, state}
