@@ -9,11 +9,11 @@ defmodule Mixpanel.Mixfile do
      elixir: "~> 1.2",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     deps: deps,
+     deps: deps(),
 
      # Hex
-     description: description,
-     package: package,
+     description: description(),
+     package: package(),
 
      # Docs
      name: "Mixpanel API",
@@ -40,7 +40,7 @@ defmodule Mixpanel.Mixfile do
 
   defp deps do
     [{:httpoison, "~> 0.9"},
-     {:poison, "~> 2.0"},
+     {:poison, "~> 3.0"},
      {:credo, "~> 0.2", only: :dev},
      {:dogma, "~> 0.0", only: :dev},
      {:dialyxir, "~> 0.3", only: :dev},
