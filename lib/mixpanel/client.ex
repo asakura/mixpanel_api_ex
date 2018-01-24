@@ -11,8 +11,8 @@ defmodule Mixpanel.Client do
   @track_endpoint "https://api.mixpanel.com/track"
   @engage_endpoint "https://api.mixpanel.com/engage"
 
-  def start_link(token, opts \\ []) do
-    GenServer.start_link(__MODULE__, {:ok, token}, opts)
+  def start_link(config, opts \\ []) do
+    GenServer.start_link(__MODULE__, {:ok, config}, opts)
   end
 
   @doc """
@@ -35,11 +35,11 @@ defmodule Mixpanel.Client do
     GenServer.cast(__MODULE__, {:engage, event})
   end
 
-  def init({:ok, token}) do
-    {:ok, %{token: token}}
+  def init({:ok, config}) do
+    {:ok, Enum.into(config, %{})}
   end
 
-  def handle_cast({:track, event, properties}, %{token: token} = state) do
+  def handle_cast({:track, event, properties}, %{token: token, active: true} = state) do
     data = %{event: event,
              properties: Map.put(properties, :token, token)}
     |> Poison.encode!
@@ -55,7 +55,7 @@ defmodule Mixpanel.Client do
     {:noreply, state}
   end
 
-  def handle_cast({:engage, event}, %{token: token} = state) do
+  def handle_cast({:engage, event}, %{token: token, active: true} = state) do
     data = event
     |> Map.put(:"$token", token)
     |> Poison.encode!
@@ -68,6 +68,11 @@ defmodule Mixpanel.Client do
         Logger.warn("Problem tracking Mixpanel profile update: #{inspect event} Got: #{inspect other}")
     end
 
+    {:noreply, state}
+  end
+
+  # No events submitted when env configuration is set to false.
+  def handle_cast(_request, %{active: false} = state) do
     {:noreply, state}
   end
 end
