@@ -20,7 +20,7 @@ defmodule Mixpanel.Client do
 
   See `Mixpanel.track/3`
   """
-  @spec track(String.t, Map.t) :: :ok
+  @spec track(String.t(), Map.t()) :: :ok
   def track(event, properties \\ %{}) do
     GenServer.cast(__MODULE__, {:track, event, properties})
   end
@@ -30,7 +30,7 @@ defmodule Mixpanel.Client do
 
   See `Mixpanel.engage/4`.
   """
-  @spec engage(Map.t) :: :ok
+  @spec engage(Map.t()) :: :ok
   def engage(event) do
     GenServer.cast(__MODULE__, {:engage, event})
   end
@@ -40,32 +40,41 @@ defmodule Mixpanel.Client do
   end
 
   def handle_cast({:track, event, properties}, %{token: token, active: true} = state) do
-    data = %{event: event,
-             properties: Map.put(properties, :token, token)}
-    |> Poison.encode!
-    |> :base64.encode
+    data =
+      %{event: event, properties: Map.put(properties, :token, token)}
+      |> Poison.encode!()
+      |> :base64.encode()
 
     case HTTPoison.get(@track_endpoint, [], params: [data: data]) do
       {:ok, %HTTPoison.Response{status_code: 200, body: "1"}} ->
         :ok
+
       other ->
-        Logger.warn("Problem tracking Mixpanel event: #{inspect event}, #{inspect properties} Got: #{inspect other}")
+        Logger.warn(
+          "Problem tracking Mixpanel event: #{inspect(event)}, #{inspect(properties)} Got: #{
+            inspect(other)
+          }"
+        )
     end
 
     {:noreply, state}
   end
 
   def handle_cast({:engage, event}, %{token: token, active: true} = state) do
-    data = event
-    |> Map.put(:"$token", token)
-    |> Poison.encode!
-    |> :base64.encode
+    data =
+      event
+      |> Map.put(:"$token", token)
+      |> Poison.encode!()
+      |> :base64.encode()
 
     case HTTPoison.get(@engage_endpoint, [], params: [data: data]) do
       {:ok, %HTTPoison.Response{status_code: 200, body: "1"}} ->
         :ok
+
       other ->
-        Logger.warn("Problem tracking Mixpanel profile update: #{inspect event} Got: #{inspect other}")
+        Logger.warn(
+          "Problem tracking Mixpanel profile update: #{inspect(event)} Got: #{inspect(other)}"
+        )
     end
 
     {:noreply, state}
