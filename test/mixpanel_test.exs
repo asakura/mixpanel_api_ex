@@ -13,7 +13,7 @@ defmodule MixpanelTest do
     {:ok, pid: pid}
   end
 
-  test_with_mock "track an event", %{pid: pid}, HTTPoison, [], mock do
+  test_with_mock "track an event", %{pid: pid}, HTTPoison, [], mock() do
     Mixpanel.track("Signed up", %{"Referred By" => "friend"}, distinct_id: "13793")
 
     :timer.sleep 50
@@ -39,7 +39,7 @@ defmodule MixpanelTest do
   end
 
 
-  test_with_mock "track a profile update", %{pid: pid}, HTTPoison, [], mock do
+  test_with_mock "track a profile update", %{pid: pid}, HTTPoison, [], mock() do
     Mixpanel.engage("13793", "$set", %{"Address" => "1313 Mockingbird Lane"}, ip: "123.123.123.123")
 
     :timer.sleep 50
