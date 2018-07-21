@@ -15,7 +15,7 @@ The package can be installed as:
 
   ```elixir
   def deps do
-    [{:mixpanel_api_ex, "~> 0.8.0"}]
+    [{:mixpanel_api_ex, "~> 1.0.1"}]
   end
   ```
 
@@ -29,7 +29,12 @@ The package can be installed as:
 
   3. Ensure your Mixpanel token was placed in config file:
   ```elixir
-  config :mixpanel_api_ex, token: "<Put API token here>"
+  config :mixpanel_api_ex, token: "<Put API token here>", active: true
+  ```
+
+  4. Disable sending requests to API for tests:
+  ```elixir
+  config :mixpanel_api_ex, token: "", active: false
   ```
 
 ## Usage
@@ -44,7 +49,7 @@ The package can be installed as:
   ```
 
   2. Track profile updates with `Mixpanel.engage/4` function:
-  
+
   ```elixir
   iex> Mixpanel.engage("13793", "$set", %{"Address" => "1313 Mockingbird Lane"}, ip: "123.123.123.123")
   :ok
