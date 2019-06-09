@@ -14,7 +14,7 @@ defmodule Mixpanel.Supervisor do
     config = Application.get_env(:mixpanel_api_ex, :config)
 
     if config[:token] == nil do
-      raise "Please set :mixpanel, :token in your app environment's config"
+      raise "Please set :mixpanel_api_ex, :token in your app environment's config"
     end
 
     children = [
