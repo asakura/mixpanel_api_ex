@@ -73,7 +73,7 @@ defmodule Mixpanel do
   @spec engage(String.t(), String.t(), Map.t(), Keyword.t()) :: :ok
   def engage(distinct_id, operation, value \\ %{}, opts \\ []) do
     distinct_id
-    |> build_engage_event(operation, value)
+    |> build_engage_event(operation, value, opts)
     |> Mixpanel.Client.engage()
 
     :ok
@@ -83,7 +83,7 @@ defmodule Mixpanel do
   def batch_engage(list, opts \\ []) do
     events =
       for {distinct_id, operation, value} <- list do
-        build_engage_event(distinct_id, operation, value)
+        build_engage_event(distinct_id, operation, value, opts)
       end
 
     Mixpanel.Client.engage(events)
@@ -91,7 +91,7 @@ defmodule Mixpanel do
     :ok
   end
 
-  defp build_engage_event(distinct_id, operation, value) do
+  defp build_engage_event(distinct_id, operation, value, opts) do
     %{"$distinct_id": distinct_id}
     |> Map.put(operation, value)
     |> engage_put_ip(Keyword.get(opts, :ip))
