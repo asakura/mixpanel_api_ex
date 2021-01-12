@@ -1,10 +1,7 @@
 defmodule Mixpanel.Supervisor do
   use Supervisor
 
-  @moduledoc """
-
-
-  """
+  @moduledoc false
 
   def start_link do
     Supervisor.start_link(__MODULE__, :ok)

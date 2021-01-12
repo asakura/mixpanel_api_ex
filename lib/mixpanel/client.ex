@@ -1,10 +1,7 @@
 defmodule Mixpanel.Client do
   use GenServer
 
-  @moduledoc """
-
-
-  """
+  @moduledoc false
 
   require Logger
 

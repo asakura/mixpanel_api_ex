@@ -48,8 +48,7 @@ defmodule Mixpanel.Mixfile do
     [
       {:httpoison, "~> 1.8"},
       {:jason, "~> 1.1"},
-      {:credo, "~> 0.2", only: :dev},
-      {:dogma, "~> 0.0", only: :dev},
+      {:credo, "~> 1.5", only: :dev},
       {:dialyxir, "~> 0.3", only: :dev},
       {:mock, "~> 0.3.6", only: :test},
       {:ex_doc, ">= 0.0.0", only: :dev},
