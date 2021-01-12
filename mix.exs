@@ -41,7 +41,7 @@ defmodule Mixpanel.Mixfile do
   end
 
   def application do
-    [mod: {Mixpanel, []}, applications: [:logger, :httpoison]]
+    [mod: {Mixpanel, []}, extra_applications: [:logger]]
   end
 
   defp deps do
