@@ -11,6 +11,13 @@ defmodule Mixpanel.Client do
   @track_endpoint "https://api.mixpanel.com/track"
   @engage_endpoint "https://api.mixpanel.com/engage"
 
+  def child_spec(arg) do
+    %{
+      id: __MODULE__,
+      start: {__MODULE__, :start_link, arg}
+    }
+  end
+
   def start_link(config, opts \\ []) do
     GenServer.start_link(__MODULE__, {:ok, config}, opts)
   end
