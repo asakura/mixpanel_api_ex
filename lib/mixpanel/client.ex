@@ -49,7 +49,7 @@ defmodule Mixpanel.Client do
   def handle_cast({:track, event, properties}, %{token: token, active: true} = config) do
     data =
       %{event: event, properties: Map.put(properties, :token, token)}
-      |> Poison.encode!()
+      |> Jason.encode!()
       |> :base64.encode()
 
     case HTTPoison.get(build_url(config, @track_path), [], params: [data: data]) do
@@ -71,7 +71,7 @@ defmodule Mixpanel.Client do
     data =
       event
       |> Map.put(:"$token", token)
-      |> Poison.encode!()
+      |> Jason.encode!()
       |> :base64.encode()
 
     case HTTPoison.get(build_url(config, @engage_path), [], params: [data: data]) do
