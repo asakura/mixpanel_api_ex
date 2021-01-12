@@ -1,0 +1,31 @@
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: OTP ${{matrix.otp}} / Elixir ${{matrix.elixir}}
+    strategy:
+      matrix:
+        include:
+          - elixir: 1.11.x
+            otp: 23.x
+            check_formatted: true
+            check_style: true
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - uses: actions/setup-elixir@v1.5
+        with:
+          otp-version: ${{matrix.otp}}
+          elixir-version: ${{matrix.elixir}}
+      - name: Install Dependencies
+        run: mix deps.get
+      - name: Check formatting
+        if: matrix.check_formatted
+        run: mix format --check-formatted
+      - name: Check style
+        if: matrix.check_style
+        run: mix credo --format flycheck
+      - name: Compile project
+        run: mix compile --warnings-as-errors
+      - name: Run tests
+        run: mix test  --cover

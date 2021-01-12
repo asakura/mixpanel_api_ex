@@ -41,17 +41,16 @@ defmodule Mixpanel.Mixfile do
   end
 
   def application do
-    [mod: {Mixpanel, []}, applications: [:logger, :httpoison]]
+    [mod: {Mixpanel, []}, extra_applications: [:logger]]
   end
 
   defp deps do
     [
-      {:httpoison, "~> 1.2"},
-      {:poison, "~> 3.1"},
-      {:credo, "~> 0.2", only: :dev},
-      {:dogma, "~> 0.0", only: :dev},
+      {:httpoison, "~> 1.8"},
+      {:jason, "~> 1.1"},
+      {:credo, "~> 1.5", only: :dev},
       {:dialyxir, "~> 0.3", only: :dev},
-      {:mock, "~> 0.3.1", only: :test},
+      {:mock, "~> 0.3.6", only: :test},
       {:ex_doc, ">= 0.0.0", only: :dev},
       {:earmark, "~> 1.0", only: :dev},
       {:inch_ex, ">= 0.0.0", only: :dev}
