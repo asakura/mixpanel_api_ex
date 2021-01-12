@@ -17,6 +17,8 @@ defmodule Mixpanel.Supervisor do
       raise "Please set :mixpanel, :token in your app environment's config"
     end
 
+    config = Keyword.put_new(config, :base_url, "https://api.mixpanel.com")
+
     children = [
       {Mixpanel.Client, [config, [name: Mixpanel.Client]]}
     ]

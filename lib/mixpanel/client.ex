@@ -8,8 +8,8 @@ defmodule Mixpanel.Client do
 
   require Logger
 
-  @track_endpoint "https://api.mixpanel.com/track"
-  @engage_endpoint "https://api.mixpanel.com/engage"
+  @track_path "/track"
+  @engage_path "/engage"
 
   def child_spec(arg) do
     %{
@@ -46,13 +46,13 @@ defmodule Mixpanel.Client do
     {:ok, Enum.into(config, %{})}
   end
 
-  def handle_cast({:track, event, properties}, %{token: token, active: true} = state) do
+  def handle_cast({:track, event, properties}, %{token: token, active: true} = config) do
     data =
       %{event: event, properties: Map.put(properties, :token, token)}
       |> Poison.encode!()
       |> :base64.encode()
 
-    case HTTPoison.get(@track_endpoint, [], params: [data: data]) do
+    case HTTPoison.get(build_url(config, @track_path), [], params: [data: data]) do
       {:ok, %HTTPoison.Response{status_code: 200, body: "1"}} ->
         :ok
 
@@ -64,17 +64,17 @@ defmodule Mixpanel.Client do
         )
     end
 
-    {:noreply, state}
+    {:noreply, config}
   end
 
-  def handle_cast({:engage, event}, %{token: token, active: true} = state) do
+  def handle_cast({:engage, event}, %{token: token, active: true} = config) do
     data =
       event
       |> Map.put(:"$token", token)
       |> Poison.encode!()
       |> :base64.encode()
 
-    case HTTPoison.get(@engage_endpoint, [], params: [data: data]) do
+    case HTTPoison.get(build_url(config, @engage_path), [], params: [data: data]) do
       {:ok, %HTTPoison.Response{status_code: 200, body: "1"}} ->
         :ok
 
@@ -84,11 +84,15 @@ defmodule Mixpanel.Client do
         )
     end
 
-    {:noreply, state}
+    {:noreply, config}
   end
 
   # No events submitted when env configuration is set to false.
-  def handle_cast(_request, %{active: false} = state) do
-    {:noreply, state}
+  def handle_cast(_request, %{active: false} = config) do
+    {:noreply, config}
+  end
+
+  defp build_url(%{base_url: base_url}, path) do
+    base_url <> path
   end
 end
