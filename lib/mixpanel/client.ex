@@ -51,17 +51,7 @@ defmodule Mixpanel.Client do
       |> Jason.encode!()
       |> :base64.encode()
 
-    case HTTPoison.get(build_url(config, @track_path), [], params: [data: data]) do
-      {:ok, %HTTPoison.Response{status_code: 200, body: "1"}} ->
-        :ok
-
-      other ->
-        Logger.warn(
-          "Problem tracking Mixpanel event: #{inspect(event)}, #{inspect(properties)} Got: #{
-            inspect(other)
-          }"
-        )
-    end
+    perform(build_url(config, @track_path), params: [data: data])
 
     {:noreply, config}
   end
@@ -73,15 +63,7 @@ defmodule Mixpanel.Client do
       |> Jason.encode!()
       |> :base64.encode()
 
-    case HTTPoison.get(build_url(config, @engage_path), [], params: [data: data]) do
-      {:ok, %HTTPoison.Response{status_code: 200, body: "1"}} ->
-        :ok
-
-      other ->
-        Logger.warn(
-          "Problem tracking Mixpanel profile update: #{inspect(event)} Got: #{inspect(other)}"
-        )
-    end
+    perform(build_url(config, @engage_path), params: [data: data])
 
     {:noreply, config}
   end
@@ -93,5 +75,27 @@ defmodule Mixpanel.Client do
 
   defp build_url(%{base_url: base_url}, path) do
     base_url <> path
+  end
+
+  defp perform(url, data, max_attempts \\ @max_attempts)
+
+  defp perform(_url, _data, 0) do
+    :ignore
+  end
+
+  defp perform(url, data, max_attempts) do
+    case Mixpanel.HTTPClient.get(url, [], data) do
+      {:ok, %{status: 200, body: "1"}} ->
+        :ok
+
+      {:error, error} ->
+        attempt = @max_attempts - (max_attempts - 1)
+
+        Logger.warn(
+          "Retrying Mixpanel http request (#{attempt}) : #{inspect(url)}, #{inspect(error)}"
+        )
+
+        perform(url, data, max_attempts - 1)
+    end
   end
 end
