@@ -8,6 +8,8 @@ defmodule Mixpanel.Client do
   @track_path "/track"
   @engage_path "/engage"
 
+  @max_attempts 3
+
   def child_spec(arg) do
     %{
       id: __MODULE__,

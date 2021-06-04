@@ -8,7 +8,7 @@ defmodule Mixpanel.Supervisor do
   end
 
   def init(:ok) do
-    config = Application.get_env(:mixpanel_api_ex, :config)
+    config = Application.get_all_env(:mixpanel_api_ex)
 
     if config[:token] == nil do
       raise "Please set :mixpanel, :token in your app environment's config"
