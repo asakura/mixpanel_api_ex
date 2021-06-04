@@ -13,7 +13,7 @@ jobs:
             check_style: true
     steps:
       - uses: actions/checkout@v2.3.4
-      - uses: actions/setup-elixir@v1.5
+      - uses: erlef/setup-elixir@v1.7
         with:
           otp-version: ${{matrix.otp}}
           elixir-version: ${{matrix.elixir}}
@@ -28,4 +28,4 @@ jobs:
       - name: Compile project
         run: mix compile --warnings-as-errors
       - name: Run tests
-        run: mix test  --cover
+        run: mix test --cover
