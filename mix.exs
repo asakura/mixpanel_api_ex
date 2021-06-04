@@ -46,14 +46,12 @@ defmodule Mixpanel.Mixfile do
 
   defp deps do
     [
-      {:httpoison, "~> 1.8"},
+      {:httpoison, "~> 1.8", optional: true},
       {:jason, "~> 1.1"},
       {:credo, "~> 1.5", only: :dev},
       {:dialyxir, "~> 0.3", only: :dev},
       {:mock, "~> 0.3.6", only: :test},
-      {:ex_doc, ">= 0.0.0", only: :dev},
-      {:earmark, "~> 1.0", only: :dev},
-      {:inch_ex, ">= 0.0.0", only: :dev}
+      {:ex_doc, ">= 0.0.0", only: :dev}
     ]
   end
 end
