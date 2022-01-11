@@ -88,6 +88,15 @@ defmodule Mixpanel.Client do
       {:ok, %{status: 200, body: "1"}} ->
         :ok
 
+      {:ok, response} ->
+        attempt = @max_attempts - (max_attempts - 1)
+
+        Logger.warn(
+          "Retrying Mixpanel http request (#{attempt}) : #{inspect(url)}, #{inspect(response)}"
+        )
+
+        perform(url, data, max_attempts - 1)
+
       {:error, error} ->
         attempt = @max_attempts - (max_attempts - 1)
 
