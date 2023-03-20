@@ -46,7 +46,7 @@ defmodule Mixpanel.Mixfile do
 
   defp deps do
     [
-      {:httpoison, "~> 1.8", optional: true},
+      {:httpoison, "~> 2.1", optional: true},
       {:jason, "~> 1.1"},
       {:credo, "~> 1.5", only: :dev},
       {:dialyxir, "~> 0.3", only: :dev},
