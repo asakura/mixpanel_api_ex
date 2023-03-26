@@ -99,4 +99,25 @@ defmodule Mixpanel do
 
   defp convert_ip({a, b, c, d}), do: "#{a}.#{b}.#{c}.#{d}"
   defp convert_ip(ip), do: ip
+
+  @doc """
+  Creates an alias for a distinct ID, merging two profiles.
+  Mixpanel supports adding an alias to a distinct id. An alias is a new
+  value that will be interpreted by Mixpanel as an existing value. That
+  means that you can send messages to Mixpanel using the new value, and
+  Mixpanel will continue to use the old value for calculating funnels and
+  retention reports, or applying updates to user profiles.
+
+  ## Arguments
+
+  * `alias_id` - The new additional ID of the user.
+  * `distinct_id` - The current ID of the user.
+
+  """
+  @spec create_alias(String.t(), String.t()) :: :ok
+  def create_alias(alias_id, distinct_id) do
+    Mixpanel.Client.create_alias(alias_id, distinct_id)
+
+    :ok
+  end
 end
