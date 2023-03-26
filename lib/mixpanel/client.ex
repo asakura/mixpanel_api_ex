@@ -37,7 +37,7 @@ defmodule Mixpanel.Client do
   end
 
   @doc """
-  Creates an alias for a Mixpanel user.
+  Creates an alias for a user profile.
 
   See `Mixpanel.create_alias/2`.
   """
