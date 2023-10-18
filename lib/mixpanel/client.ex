@@ -31,7 +31,7 @@ defmodule Mixpanel.Client do
 
   See `Mixpanel.engage/4`.
   """
-  @spec engage(Map.t()) :: :ok
+  @spec engage(Map.t() | [Map.t()]) :: :ok
   def engage(event) do
     GenServer.cast(__MODULE__, {:engage, event})
   end
@@ -74,7 +74,7 @@ defmodule Mixpanel.Client do
   def handle_cast({:engage, event}, %{token: token, active: true} = state) do
     data =
       event
-      |> Map.put(:"$token", token)
+      |> put_token(token)
       |> Poison.encode!()
       |> :base64.encode()
 
@@ -124,4 +124,7 @@ defmodule Mixpanel.Client do
   def handle_cast(_request, %{active: false} = state) do
     {:noreply, state}
   end
+
+  defp put_token(events, token) when is_list(events), do: Enum.map(events, &put_token(&1, token))
+  defp put_token(event, token), do: Map.put(event, :"$token", token)
 end

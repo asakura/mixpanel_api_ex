@@ -72,16 +72,31 @@ defmodule Mixpanel do
   """
   @spec engage(String.t(), String.t(), Map.t(), Keyword.t()) :: :ok
   def engage(distinct_id, operation, value \\ %{}, opts \\ []) do
-    event =
-      %{"$distinct_id": distinct_id}
-      |> Map.put(operation, value)
-      |> engage_put_ip(Keyword.get(opts, :ip))
-      |> engage_put_time(Keyword.get(opts, :time))
-      |> engage_put_ignore_time(Keyword.get(opts, :ignore_time))
-
-    Mixpanel.Client.engage(event)
+    distinct_id
+    |> build_engage_event(operation, value, opts)
+    |> Mixpanel.Client.engage()
 
     :ok
+  end
+
+  @spec batch_engage([{String.t(), String.t(), Map.t()}], Keyword.t()) :: :ok
+  def batch_engage(list, opts \\ []) do
+    events =
+      for {distinct_id, operation, value} <- list do
+        build_engage_event(distinct_id, operation, value, opts)
+      end
+
+    Mixpanel.Client.engage(events)
+
+    :ok
+  end
+
+  defp build_engage_event(distinct_id, operation, value, opts) do
+    %{"$distinct_id": distinct_id}
+    |> Map.put(operation, value)
+    |> engage_put_ip(Keyword.get(opts, :ip))
+    |> engage_put_time(Keyword.get(opts, :time))
+    |> engage_put_ignore_time(Keyword.get(opts, :ignore_time))
   end
 
   defp engage_put_ip(event, nil), do: event
