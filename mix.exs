@@ -47,7 +47,7 @@ defmodule Mixpanel.Mixfile do
   defp deps do
     [
       {:httpoison, "~> 2.1"},
-      {:poison, "~> 5.0"},
+      {:jason, "~> 1.4"},
       {:credo, "~> 1.7", only: :dev},
       {:dialyxir, "~> 1.4", only: :dev},
       {:mock, "~> 0.3.1", only: :test},
