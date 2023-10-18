@@ -61,7 +61,7 @@ defmodule Mixpanel.Client do
         :ok
 
       other ->
-        Logger.warn(
+        Logger.warning(
           "Problem tracking Mixpanel event: #{inspect(event)}, #{inspect(properties)} Got: #{
             inspect(other)
           }"
@@ -83,7 +83,7 @@ defmodule Mixpanel.Client do
         :ok
 
       other ->
-        Logger.warn(
+        Logger.warning(
           "Problem tracking Mixpanel profile update: #{inspect(event)} Got: #{inspect(other)}"
         )
     end
@@ -109,7 +109,7 @@ defmodule Mixpanel.Client do
         :ok
 
       other ->
-        Logger.warn(
+        Logger.warning(
           "Problem creating Mixpanel alias: alias=#{inspect(alias)}, distinct_id=#{inspect(distinct_id)} Got: #{
             inspect(other)
           }"
