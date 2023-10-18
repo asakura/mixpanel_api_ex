@@ -12,8 +12,26 @@ defmodule Mixpanel.Client do
   @engage_endpoint "https://api.mixpanel.com/engage"
   @alias_endpoint "https://api.mixpanel.com/track#identity-create-alias"
 
-  def start_link(config, opts \\ []) do
-    GenServer.start_link(__MODULE__, {:ok, config}, opts)
+  def start_link(init_args) do
+    {opts, gen_server_opts} = Keyword.split(init_args, [:token, :active])
+
+    GenServer.start_link(__MODULE__, opts, gen_server_opts)
+  end
+
+  def child_spec(init_args) do
+    init_args =
+      case Keyword.has_key?(init_args, :name) do
+        true ->
+          init_args
+
+        false ->
+          [{:name, __MODULE__} | init_args]
+      end
+
+    %{
+      id: __MODULE__,
+      start: {__MODULE__, :start_link, [init_args]}
+    }
   end
 
   @doc """
@@ -46,7 +64,7 @@ defmodule Mixpanel.Client do
     GenServer.cast(__MODULE__, {:create_alias, alias, distinct_id})
   end
 
-  def init({:ok, config}) do
+  def init(config) do
     {:ok, Enum.into(config, %{})}
   end
 
