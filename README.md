@@ -23,20 +23,22 @@ The package can be installed as:
 
   ```elixir
   def application do
-    [applications: [:mixpanel_api_ex]]
+    [applications: [:mixpanel_api_ex, :your_app]]
   end
   ```
 
   3. Ensure your Mixpanel token was placed in config file:
   ```elixir
-  config :mixpanel_api_ex,
-         config: [token: "<Put API token here>", active: true]
+  config :mixpanel_api_ex, :config,
+     token: "<Put API token here>",
+     active: true
   ```
 
   4. Disable sending requests to API for tests:
   ```elixir
-  config :mixpanel_api_ex,
-         config: [token: "<Put API token here>", active: false]
+  config :mixpanel_api_ex, :config,
+      token: "<Put API token here>",
+      active: false
   ```
 
 ## Usage
