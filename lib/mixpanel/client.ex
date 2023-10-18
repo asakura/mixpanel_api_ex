@@ -10,6 +10,7 @@ defmodule Mixpanel.Client do
 
   @track_endpoint "https://api.mixpanel.com/track"
   @engage_endpoint "https://api.mixpanel.com/engage"
+  @alias_endpoint "https://api.mixpanel.com/track#identity-create-alias"
 
   def start_link(config, opts \\ []) do
     GenServer.start_link(__MODULE__, {:ok, config}, opts)
@@ -33,6 +34,16 @@ defmodule Mixpanel.Client do
   @spec engage(Map.t()) :: :ok
   def engage(event) do
     GenServer.cast(__MODULE__, {:engage, event})
+  end
+
+  @doc """
+  Creates an alias for a user profile.
+
+  See `Mixpanel.create_alias/2`.
+  """
+  @spec create_alias(String.t(), String.t()) :: :ok
+  def create_alias(alias, distinct_id) do
+    GenServer.cast(__MODULE__, {:create_alias, alias, distinct_id})
   end
 
   def init({:ok, config}) do
@@ -79,6 +90,35 @@ defmodule Mixpanel.Client do
 
     {:noreply, state}
   end
+
+  def handle_cast({:create_alias, alias, distinct_id}, %{token: token, active: true} = state) do
+    data =
+      %{
+        event: "$create_alias",
+        properties: %{
+          token: token,
+          alias: alias,
+          distinct_id: distinct_id
+        }
+      }
+      |> Poison.encode!()
+      |> :base64.encode()
+
+    case HTTPoison.post(@alias_endpoint, "data=#{data}", [{"Content-Type", "application/x-www-form-urlencoded"}]) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: "1"}} ->
+        :ok
+
+      other ->
+        Logger.warn(
+          "Problem creating Mixpanel alias: alias=#{inspect(alias)}, distinct_id=#{inspect(distinct_id)} Got: #{
+            inspect(other)
+          }"
+        )
+    end
+
+    {:noreply, state}
+  end
+
 
   # No events submitted when env configuration is set to false.
   def handle_cast(_request, %{active: false} = state) do
