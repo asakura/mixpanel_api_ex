@@ -62,9 +62,7 @@ defmodule Mixpanel.Client do
 
       other ->
         Logger.warning(
-          "Problem tracking Mixpanel event: #{inspect(event)}, #{inspect(properties)} Got: #{
-            inspect(other)
-          }"
+          "Problem tracking Mixpanel event: #{inspect(event)}, #{inspect(properties)} Got: #{inspect(other)}"
         )
     end
 
@@ -104,21 +102,20 @@ defmodule Mixpanel.Client do
       |> Poison.encode!()
       |> :base64.encode()
 
-    case HTTPoison.post(@alias_endpoint, "data=#{data}", [{"Content-Type", "application/x-www-form-urlencoded"}]) do
+    case HTTPoison.post(@alias_endpoint, "data=#{data}", [
+           {"Content-Type", "application/x-www-form-urlencoded"}
+         ]) do
       {:ok, %HTTPoison.Response{status_code: 200, body: "1"}} ->
         :ok
 
       other ->
         Logger.warning(
-          "Problem creating Mixpanel alias: alias=#{inspect(alias)}, distinct_id=#{inspect(distinct_id)} Got: #{
-            inspect(other)
-          }"
+          "Problem creating Mixpanel alias: alias=#{inspect(alias)}, distinct_id=#{inspect(distinct_id)} Got: #{inspect(other)}"
         )
     end
 
     {:noreply, state}
   end
-
 
   # No events submitted when env configuration is set to false.
   def handle_cast(_request, %{active: false} = state) do
