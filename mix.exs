@@ -40,7 +40,11 @@ defmodule Mixpanel.Mixfile do
     ]
   end
 
-  def application do
+  def application(:test) do
+    [mod: {Mixpanel, []}, applications: [:logger, :mock, :jason, :httpoison]]
+  end
+
+  def application(_) do
     [mod: {Mixpanel, []}, applications: [:logger, :httpoison]]
   end
 
@@ -48,12 +52,11 @@ defmodule Mixpanel.Mixfile do
     [
       {:httpoison, "~> 2.1"},
       {:jason, "~> 1.4"},
-      {:credo, "~> 1.7", only: :dev},
-      {:dialyxir, "~> 1.4", only: :dev},
-      {:mock, "~> 0.3.1", only: :test},
-      {:ex_doc, ">= 0.0.0", only: :dev},
-      {:earmark, "~> 1.0", only: :dev},
-      {:inch_ex, ">= 0.0.0", only: :dev}
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:mock, "~> 0.3.0", only: :test},
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+      {:inch_ex, ">= 0.0.0", only: [:dev, :test], runtime: false}
     ]
   end
 end
