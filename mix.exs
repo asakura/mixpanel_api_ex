@@ -22,7 +22,7 @@ defmodule Mixpanel.Mixfile do
         extras: ["README.md", "CHANGELOG.md"],
         source_ref: "v#{@version}",
         main: "Mixpanel",
-        source_url: "https://github.com/agevio/mixpanel_api_ex"
+        source_url: "https://github.com/asakura/mixpanel_api_ex"
       ]
     ]
   end
@@ -35,7 +35,7 @@ defmodule Mixpanel.Mixfile do
     [
       maintainers: ["Mikalai Seva"],
       licenses: ["The MIT License"],
-      links: %{"GitHub" => "https://github.com/agevio/mixpanel_api_ex"},
+      links: %{"GitHub" => "https://github.com/asakura/mixpanel_api_ex"},
       files: ~w(mix.exs README.md CHANGELOG.md lib)
     ]
   end
