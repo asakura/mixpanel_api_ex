@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 if Mix.env() == :test do
   config :mixpanel_api_ex, :config,
