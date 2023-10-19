@@ -1,18 +1,31 @@
-on: [push, pull_request]
+name: Runs on master branch or on open pull requests that are ready for review
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+
+env:
+  COMMIT_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+  BRANCH: ${{ github.event_name == 'pull_request' && format('refs/heads/{0}', github.event.pull_request.head.ref) || github.ref }}
 
 jobs:
   test:
+    # This condition ensures that this job will not run on pull requests in draft state
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     strategy:
       matrix:
         os: [ubuntu-20.04, ubuntu-22.04]
         otp: [24, 25, 26]
         elixir: [1.15]
-        check_formatted: true
-        check_style: true
     runs-on: ${{matrix.os}}
     name: OTP ${{matrix.otp}} / Elixir ${{matrix.elixir}} (${{matrix.os}})
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{env.BRANCH}}
       - uses: erlef/setup-beam@v1.16.0
         with:
           otp-version: ${{matrix.otp}}
@@ -20,10 +33,8 @@ jobs:
       - name: Install Dependencies
         run: mix deps.get
       - name: Check formatting
-        if: matrix.check_formatted
         run: mix format --check-formatted
       - name: Check style
-        if: matrix.check_style
         run: mix credo --format flycheck
       - name: Compile project
         run: mix compile --warnings-as-errors
