@@ -1,0 +1,31 @@
+on: [push, pull_request]
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, ubuntu-22.04]
+        otp: [24, 25, 26]
+        elixir: [1.15]
+        check_formatted: true
+        check_style: true
+    runs-on: ${{matrix.os}}
+    name: OTP ${{matrix.otp}} / Elixir ${{matrix.elixir}} (${{matrix.os}})
+    steps:
+      - uses: actions/checkout@v4
+      - uses: erlef/setup-beam@v1.16.0
+        with:
+          otp-version: ${{matrix.otp}}
+          elixir-version: ${{matrix.elixir}}
+      - name: Install Dependencies
+        run: mix deps.get
+      - name: Check formatting
+        if: matrix.check_formatted
+        run: mix format --check-formatted
+      - name: Check style
+        if: matrix.check_style
+        run: mix credo --format flycheck
+      - name: Compile project
+        run: mix compile --warnings-as-errors
+      - name: Run tests
+        run: mix test  --cover
