@@ -2,25 +2,29 @@ defmodule Mixpanel.Supervisor do
   use Supervisor
 
   @moduledoc """
-
-
+  A simple supervisor which manages API Client process alive.
   """
 
-  def start_link do
-    Supervisor.start_link(__MODULE__, :ok)
-  end
-
-  def init(:ok) do
+  @spec start_link :: :ignore | {:error, any} | {:ok, pid}
+  def start_link() do
     config = Application.get_env(:mixpanel_api_ex, :config)
 
     if config[:token] == nil do
-      raise "Please set :mixpanel_api_ex, :token in your app environment's config"
+      raise ArgumentError, "Please set :mixpanel_api_ex, :token in your app environment's config"
     end
 
+    Supervisor.start_link(__MODULE__, config, name: __MODULE__)
+  end
+
+  @spec init(keyword) ::
+          {:ok,
+           {Supervisor.sup_flags(),
+            [Supervisor.child_spec() | (old_erlang_child_spec :: :supervisor.child_spec())]}}
+  def init(config) do
     children = [
       {Mixpanel.Client, config}
     ]
 
-    Supervisor.init(children, strategy: :one_for_one, name: Mixpanel.Supervisor)
+    Supervisor.init(children, strategy: :one_for_one)
   end
 end

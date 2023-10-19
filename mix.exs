@@ -11,6 +11,18 @@ defmodule Mixpanel.Mixfile do
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       deps: deps(),
+      dialyzer: [
+        plt_add_deps: :apps_direct,
+        plt_add_apps: [:logger],
+        flags: [
+          "-Werror_handling",
+          "-Wextra_return",
+          "-Wmissing_return",
+          "-Wunknown",
+          "-Wunmatched_returns",
+          "-Wunderspecs"
+        ]
+      ],
 
       # Hex
       description: description(),

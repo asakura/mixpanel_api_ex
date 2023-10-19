@@ -5,6 +5,7 @@ defmodule Mixpanel do
   Elixir client for the Mixpanel API.
   """
 
+  @spec start(any, any) :: :ignore | {:error, any} | {:ok, pid}
   def start(_type, _args) do
     Mixpanel.Supervisor.start_link()
   end
@@ -25,7 +26,7 @@ defmodule Mixpanel do
     * `:ip`          - An IP address string (e.g. "127.0.0.1") associated with the event. This is used for adding geolocation data to events, and should only be required if you are making requests from your backend. If `:ip` is absent, Mixpanel will ignore the IP address of the request.
 
   """
-  @spec track(String.t(), Map.t(), Keyword.t()) :: :ok
+  @spec track(String.t(), map, keyword) :: :ok
   def track(event, properties \\ %{}, opts \\ []) do
     properties =
       properties
@@ -70,7 +71,7 @@ defmodule Mixpanel do
   * `:time`        - Seconds since midnight, January 1st 1970, UTC. Updates are applied in `:time` order, so setting this value can lead to unexpected results unless care is taken. If `:time` is not included in a request, Mixpanel will use the time the update arrives at the Mixpanel server.
   * `:ignore_time` - If the `:ignore_time` property is present and `true` in your update request, Mixpanel will not automatically update the "Last Seen" property of the profile. Otherwise, Mixpanel will add a "Last Seen" property associated with the current time for all $set, $append, and $add operations.
   """
-  @spec engage(String.t(), String.t(), Map.t(), Keyword.t()) :: :ok
+  @spec engage(String.t(), String.t(), map, keyword) :: :ok
   def engage(distinct_id, operation, value \\ %{}, opts \\ []) do
     distinct_id
     |> build_engage_event(operation, value, opts)
@@ -79,7 +80,7 @@ defmodule Mixpanel do
     :ok
   end
 
-  @spec batch_engage([{String.t(), String.t(), Map.t()}], Keyword.t()) :: :ok
+  @spec batch_engage([{String.t(), String.t(), map}], keyword) :: :ok
   def batch_engage(list, opts \\ []) do
     events =
       for {distinct_id, operation, value} <- list do

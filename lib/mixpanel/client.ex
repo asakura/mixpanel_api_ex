@@ -2,8 +2,7 @@ defmodule Mixpanel.Client do
   use GenServer
 
   @moduledoc """
-
-
+  Mixpanel API Client GenServer.
   """
 
   require Logger
@@ -14,6 +13,7 @@ defmodule Mixpanel.Client do
   @alias_endpoint "/track#identity-create-alias"
   @max_attempts 3
 
+  @spec start_link(keyword) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(init_args) do
     {opts, gen_server_opts} = Keyword.split(init_args, [:token, :active, :base_url])
 
@@ -37,7 +37,7 @@ defmodule Mixpanel.Client do
 
   See `Mixpanel.track/3`
   """
-  @spec track(String.t(), Map.t()) :: :ok
+  @spec track(String.t(), map) :: :ok
   def track(event, properties \\ %{}) do
     GenServer.cast(__MODULE__, {:track, event, properties})
   end
@@ -47,7 +47,7 @@ defmodule Mixpanel.Client do
 
   See `Mixpanel.engage/4`.
   """
-  @spec engage(Map.t() | [Map.t()]) :: :ok
+  @spec engage(map | [map]) :: :ok
   def engage(event) do
     GenServer.cast(__MODULE__, {:engage, event})
   end
