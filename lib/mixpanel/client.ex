@@ -8,12 +8,13 @@ defmodule Mixpanel.Client do
 
   require Logger
 
-  @track_endpoint "https://api.mixpanel.com/track"
-  @engage_endpoint "https://api.mixpanel.com/engage"
-  @alias_endpoint "https://api.mixpanel.com/track#identity-create-alias"
+  @base_url "https://api.mixpanel.com"
+  @track_endpoint "/track"
+  @engage_endpoint "/engage"
+  @alias_endpoint "/track#identity-create-alias"
 
   def start_link(init_args) do
-    {opts, gen_server_opts} = Keyword.split(init_args, [:token, :active])
+    {opts, gen_server_opts} = Keyword.split(init_args, [:token, :active, :base_url])
 
     GenServer.start_link(__MODULE__, opts, gen_server_opts)
   end
@@ -26,6 +27,15 @@ defmodule Mixpanel.Client do
 
         false ->
           [{:name, __MODULE__} | init_args]
+      end
+
+    init_args =
+      case Keyword.has_key?(init_args, :base_url) do
+        true ->
+          init_args
+
+        false ->
+          [{:base_url, @base_url} | init_args]
       end
 
     %{
@@ -74,7 +84,7 @@ defmodule Mixpanel.Client do
       |> Jason.encode!()
       |> :base64.encode()
 
-    case HTTPoison.get(@track_endpoint, [], params: [data: data]) do
+    case HTTPoison.get(state.base_url <> @track_endpoint, [], params: [data: data]) do
       {:ok, %HTTPoison.Response{status_code: 200, body: "1"}} ->
         :ok
 
@@ -94,7 +104,7 @@ defmodule Mixpanel.Client do
       |> Jason.encode!()
       |> :base64.encode()
 
-    case HTTPoison.get(@engage_endpoint, [], params: [data: data]) do
+    case HTTPoison.get(state.base_url <> @engage_endpoint, [], params: [data: data]) do
       {:ok, %HTTPoison.Response{status_code: 200, body: "1"}} ->
         :ok
 
@@ -120,7 +130,7 @@ defmodule Mixpanel.Client do
       |> Jason.encode!()
       |> :base64.encode()
 
-    case HTTPoison.post(@alias_endpoint, "data=#{data}", [
+    case HTTPoison.post(state.base_url <> @alias_endpoint, "data=#{data}", [
            {"Content-Type", "application/x-www-form-urlencoded"}
          ]) do
       {:ok, %HTTPoison.Response{status_code: 200, body: "1"}} ->

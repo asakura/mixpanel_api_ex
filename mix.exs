@@ -41,11 +41,11 @@ defmodule Mixpanel.Mixfile do
   end
 
   def application(:test) do
-    [mod: {Mixpanel, []}, applications: [:logger, :mock, :jason, :httpoison]]
+    [mod: {Mixpanel, []}, extra_applications: [:logger, :jason]]
   end
 
   def application(_) do
-    [mod: {Mixpanel, []}, applications: [:logger, :httpoison]]
+    [mod: {Mixpanel, []}, extra_applications: [:logger]]
   end
 
   defp deps do
