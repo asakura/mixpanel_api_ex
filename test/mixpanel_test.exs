@@ -1,10 +1,15 @@
 defmodule MixpanelTest do
   use ExUnit.Case
 
+  import ExUnit.CaptureLog
   import Mock
 
   defp mock() do
     [get: fn _, _, _ -> {:ok, %HTTPoison.Response{status_code: 200, body: "1"}} end]
+  end
+
+  defp error_mock() do
+    [get: fn _, _, _ -> {:error, %HTTPoison.Error{reason: "error"}} end]
   end
 
   setup do
@@ -14,6 +19,13 @@ defmodule MixpanelTest do
     {:ok, []}
   end
 
+  test_with_mock "works with retries", _, HTTPoison, [], error_mock() do
+    capture_log(fn ->
+      Mixpanel.track("Signed up", %{"Referred By" => "friend"}, distinct_id: "13793")
+      :timer.sleep(50)
+    end)
+
+    assert_called_exactly(HTTPoison.get("https://api.mixpanel.com/track", [], :_), 3)
   end
 
   test_with_mock "track an event", _, HTTPoison, [], mock() do

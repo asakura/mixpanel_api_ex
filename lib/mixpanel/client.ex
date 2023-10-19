@@ -12,6 +12,7 @@ defmodule Mixpanel.Client do
   @track_endpoint "/track"
   @engage_endpoint "/engage"
   @alias_endpoint "/track#identity-create-alias"
+  @max_attempts 3
 
   def start_link(init_args) do
     {opts, gen_server_opts} = Keyword.split(init_args, [:token, :active, :base_url])
@@ -21,22 +22,9 @@ defmodule Mixpanel.Client do
 
   def child_spec(init_args) do
     init_args =
-      case Keyword.has_key?(init_args, :name) do
-        true ->
-          init_args
-
-        false ->
-          [{:name, __MODULE__} | init_args]
-      end
-
-    init_args =
-      case Keyword.has_key?(init_args, :base_url) do
-        true ->
-          init_args
-
-        false ->
-          [{:base_url, @base_url} | init_args]
-      end
+      init_args
+      |> Keyword.put_new(:name, __MODULE__)
+      |> Keyword.put_new(:base_url, @base_url)
 
     %{
       id: __MODULE__,
@@ -84,13 +72,13 @@ defmodule Mixpanel.Client do
       |> Jason.encode!()
       |> :base64.encode()
 
-    case HTTPoison.get(state.base_url <> @track_endpoint, [], params: [data: data]) do
-      {:ok, %HTTPoison.Response{status_code: 200, body: "1"}} ->
+    case perform(state.base_url <> @track_endpoint, data) do
+      :ok ->
         :ok
 
-      other ->
+      _ ->
         Logger.warning(
-          "Problem tracking Mixpanel event: #{inspect(event)}, #{inspect(properties)} Got: #{inspect(other)}"
+          "Problem tracking Mixpanel event: #{inspect(event)}, #{inspect(properties)}"
         )
     end
 
@@ -104,14 +92,12 @@ defmodule Mixpanel.Client do
       |> Jason.encode!()
       |> :base64.encode()
 
-    case HTTPoison.get(state.base_url <> @engage_endpoint, [], params: [data: data]) do
-      {:ok, %HTTPoison.Response{status_code: 200, body: "1"}} ->
+    case perform(state.base_url <> @engage_endpoint, data) do
+      :ok ->
         :ok
 
-      other ->
-        Logger.warning(
-          "Problem tracking Mixpanel profile update: #{inspect(event)} Got: #{inspect(other)}"
-        )
+      _ ->
+        Logger.warning("Problem tracking Mixpanel profile update: #{inspect(event)}")
     end
 
     {:noreply, state}
@@ -150,6 +136,40 @@ defmodule Mixpanel.Client do
     {:noreply, state}
   end
 
-  defp put_token(events, token) when is_list(events), do: Enum.map(events, &put_token(&1, token))
-  defp put_token(event, token), do: Map.put(event, :"$token", token)
+  defp put_token(events, token) when is_list(events),
+    do: Enum.map(events, &put_token(&1, token))
+
+  defp put_token(event, token),
+    do: Map.put(event, :"$token", token)
+
+  defp perform(url, data, max_attempts \\ @max_attempts)
+
+  defp perform(_url, _data, 0) do
+    :ignore
+  end
+
+  defp perform(url, data, max_attempts) do
+    case HTTPoison.get(url, [], params: [data: data]) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: "1"}} ->
+        :ok
+
+      {:ok, %HTTPoison.Response{} = response} ->
+        attempt = @max_attempts - (max_attempts + 1)
+
+        Logger.warning(
+          "Retrying Mixpanel request: attempt=#{attempt}, url=#{inspect(url)}, response=#{inspect(response)}"
+        )
+
+        perform(url, data, max_attempts - 1)
+
+      {:error, error} ->
+        attempt = @max_attempts - (max_attempts + 1)
+
+        Logger.warning(
+          "Retrying Mixpanel request: attempt=#{attempt}, url=#{inspect(url)}, error=#{inspect(error)}"
+        )
+
+        perform(url, data, max_attempts - 1)
+    end
+  end
 end
