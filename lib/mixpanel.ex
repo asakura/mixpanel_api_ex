@@ -21,10 +21,20 @@ defmodule Mixpanel do
 
   ## Options
 
-    * `:distinct_id` - The value of distinct_id will be treated as a string, and used to uniquely identify a user associated with your event. If you provide a distinct_id property with your events, you can track a given user through funnels and distinguish unique users for retention analyses. You should always send the same distinct_id when an event is triggered by the same user.
-    * `:time`        - The time an event occurred. If present, the value should be a unix timestamp (seconds since midnight, January 1st, 1970 - UTC). If this property is not included in your request, Mixpanel will use the time the event arrives at the server.
-    * `:ip`          - An IP address string (e.g. "127.0.0.1") associated with the event. This is used for adding geolocation data to events, and should only be required if you are making requests from your backend. If `:ip` is absent, Mixpanel will ignore the IP address of the request.
-
+    * `:distinct_id` - The value of distinct_id will be treated as a string, and
+      used to uniquely identify a user associated with your event. If you
+      provide a distinct_id property with your events, you can track a given
+      user through funnels and distinguish unique users for retention analyses.
+      You should always send the same distinct_id when an event is triggered by
+      the same user.
+    * `:time` - The time an event occurred. If present, the value should be a
+      unix timestamp (seconds since midnight, January 1st, 1970 - UTC). If this
+      property is not included in your request, Mixpanel will use the time the
+      event arrives at the server.
+    * `:ip` - An IP address string (e.g. "127.0.0.1") associated with the event.
+      This is used for adding geolocation data to events, and should only be
+      required if you are making requests from your backend. If `:ip` is absent,
+      Mixpanel will ignore the IP address of the request.
   """
   @spec track(String.t(), map, keyword) :: :ok
   def track(event, properties \\ %{}, opts \\ []) do
@@ -67,9 +77,18 @@ defmodule Mixpanel do
 
   ## Options
 
-  * `:ip`          - The IP address associated with a given profile. If `:ip` isn't provided, Mixpanel will use the IP address of the request. Mixpanel uses an IP address to guess at the geographic location of users. If `:ip` is set to "0", Mixpanel will ignore IP information.
-  * `:time`        - Seconds since midnight, January 1st 1970, UTC. Updates are applied in `:time` order, so setting this value can lead to unexpected results unless care is taken. If `:time` is not included in a request, Mixpanel will use the time the update arrives at the Mixpanel server.
-  * `:ignore_time` - If the `:ignore_time` property is present and `true` in your update request, Mixpanel will not automatically update the "Last Seen" property of the profile. Otherwise, Mixpanel will add a "Last Seen" property associated with the current time for all $set, $append, and $add operations.
+  * `:ip` - The IP address associated with a given profile. If `:ip` isn't
+    provided, Mixpanel will use the IP address of the request. Mixpanel uses an
+    IP address to guess at the geographic location of users. If `:ip` is set to
+    "0", Mixpanel will ignore IP information.
+  * `:time` - Seconds since midnight, January 1st 1970, UTC. Updates are applied
+    in `:time` order, so setting this value can lead to unexpected results
+    unless care is taken. If `:time` is not included in a request, Mixpanel will
+    use the time the update arrives at the Mixpanel server.
+  * `:ignore_time` - If the `:ignore_time` property is present and `true` in
+    your update request, Mixpanel will not automatically update the "Last Seen"
+    property of the profile. Otherwise, Mixpanel will add a "Last Seen" property
+    associated with the current time for all $set, $append, and $add operations.
   """
   @spec engage(String.t(), String.t(), map, keyword) :: :ok
   def engage(distinct_id, operation, value \\ %{}, opts \\ []) do
@@ -117,12 +136,12 @@ defmodule Mixpanel do
   defp convert_ip(ip), do: ip
 
   @doc """
-  Creates an alias for a distinct ID, merging two profiles.
-  Mixpanel supports adding an alias to a distinct id. An alias is a new
-  value that will be interpreted by Mixpanel as an existing value. That
-  means that you can send messages to Mixpanel using the new value, and
-  Mixpanel will continue to use the old value for calculating funnels and
-  retention reports, or applying updates to user profiles.
+  Creates an alias for a distinct ID, merging two profiles. Mixpanel supports
+  adding an alias to a distinct id. An alias is a new value that will be
+  interpreted by Mixpanel as an existing value. That means that you can send
+  messages to Mixpanel using the new value, and Mixpanel will continue to use
+  the old value for calculating funnels and retention reports, or applying
+  updates to user profiles.
 
   ## Arguments
 
