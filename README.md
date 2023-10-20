@@ -2,7 +2,6 @@
 
 [![Hex.pm](https://img.shields.io/hexpm/v/mixpanel_api_ex.svg?style=flat-square)](https://hex.pm/packages/mixpanel_api_ex)
 [![Hex.pm](https://img.shields.io/hexpm/dt/mixpanel_api_ex.svg?style=flat-square)](https://hex.pm/packages/mixpanel_api_ex)
-[![Inline docs](http://inch-ci.org/github/asakura/mixpanel_api_ex.svg?branch=master&style=flat)](http://inch-ci.org/github/asakura/mixpanel_api_ex)
 
 Elixir client for the Mixpanel API.
 

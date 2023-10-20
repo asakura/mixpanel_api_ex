@@ -67,8 +67,7 @@ defmodule Mixpanel.Mixfile do
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:mock, "~> 0.3.0", only: :test},
-      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
-      {:inch_ex, ">= 0.0.0", only: [:dev, :test], runtime: false}
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
     ]
   end
 end
