@@ -23,6 +23,11 @@ defmodule Mixpanel.Mixfile do
           "-Wunderspecs"
         ]
       ],
+      test_coverage: [
+        summary: [
+          threshold: 70
+        ]
+      ],
 
       # Hex
       description: description(),
