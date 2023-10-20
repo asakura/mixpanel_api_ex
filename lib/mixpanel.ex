@@ -152,7 +152,5 @@ defmodule Mixpanel do
   @spec create_alias(String.t(), String.t()) :: :ok
   def create_alias(alias_id, distinct_id) do
     Mixpanel.Client.create_alias(alias_id, distinct_id)
-
-    :ok
   end
 end

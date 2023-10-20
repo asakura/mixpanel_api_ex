@@ -38,7 +38,7 @@ defmodule Mixpanel.Client do
   See `Mixpanel.track/3`
   """
   @spec track(String.t(), map) :: :ok
-  def track(event, properties \\ %{}) do
+  def track(event, properties) do
     GenServer.cast(__MODULE__, {:track, event, properties})
   end
 
@@ -153,21 +153,20 @@ defmodule Mixpanel.Client do
       {:ok, %HTTPoison.Response{status_code: 200, body: "1"}} ->
         :ok
 
-      {:ok, %HTTPoison.Response{} = response} ->
+      other ->
         attempt = @max_attempts - (max_attempts + 1)
 
-        Logger.warning(
-          "Retrying Mixpanel request: attempt=#{attempt}, url=#{inspect(url)}, response=#{inspect(response)}"
-        )
+        case other do
+          {:ok, %HTTPoison.Response{} = response} ->
+            Logger.warning(
+              "Retrying Mixpanel request: attempt=#{attempt}, url=#{inspect(url)}, response=#{inspect(response)}"
+            )
 
-        perform(url, data, max_attempts - 1)
-
-      {:error, error} ->
-        attempt = @max_attempts - (max_attempts + 1)
-
-        Logger.warning(
-          "Retrying Mixpanel request: attempt=#{attempt}, url=#{inspect(url)}, error=#{inspect(error)}"
-        )
+          {:error, reason} ->
+            Logger.warning(
+              "Retrying Mixpanel request: attempt=#{attempt}, url=#{inspect(url)}, error=#{inspect(reason)}"
+            )
+        end
 
         perform(url, data, max_attempts - 1)
     end
