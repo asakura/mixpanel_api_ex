@@ -1,6 +1,8 @@
 defmodule Mixpanel do
   use Application
 
+  alias Mixpanel.Client
+
   @moduledoc """
   Elixir client for the Mixpanel API.
   """
@@ -36,7 +38,7 @@ defmodule Mixpanel do
       required if you are making requests from your backend. If `:ip` is absent,
       Mixpanel will ignore the IP address of the request.
   """
-  @spec track(String.t(), map, keyword) :: :ok
+  @spec track(Client.event(), Client.properties(), keyword) :: :ok
   def track(event, properties \\ %{}, opts \\ []) do
     properties =
       properties
@@ -44,7 +46,7 @@ defmodule Mixpanel do
       |> track_put_distinct_id(Keyword.get(opts, :distinct_id))
       |> track_put_ip(Keyword.get(opts, :ip))
 
-    Mixpanel.Client.track(event, properties)
+    Client.track(event, properties)
 
     :ok
   end
@@ -90,23 +92,23 @@ defmodule Mixpanel do
     property of the profile. Otherwise, Mixpanel will add a "Last Seen" property
     associated with the current time for all $set, $append, and $add operations.
   """
-  @spec engage(String.t(), String.t(), map, keyword) :: :ok
+  @spec engage(Client.distinct_id(), String.t(), map, keyword) :: :ok
   def engage(distinct_id, operation, value \\ %{}, opts \\ []) do
     distinct_id
     |> build_engage_event(operation, value, opts)
-    |> Mixpanel.Client.engage()
+    |> Client.engage()
 
     :ok
   end
 
-  @spec batch_engage([{String.t(), String.t(), map}], keyword) :: :ok
+  @spec batch_engage([{Client.distinct_id(), String.t(), map}], keyword) :: :ok
   def batch_engage(list, opts \\ []) do
     events =
       for {distinct_id, operation, value} <- list do
         build_engage_event(distinct_id, operation, value, opts)
       end
 
-    Mixpanel.Client.engage(events)
+    Client.engage(events)
 
     :ok
   end
@@ -149,8 +151,8 @@ defmodule Mixpanel do
   * `distinct_id` - The current ID of the user.
 
   """
-  @spec create_alias(String.t(), String.t()) :: :ok
+  @spec create_alias(Client.alias_id(), Client.distinct_id()) :: :ok
   def create_alias(alias_id, distinct_id) do
-    Mixpanel.Client.create_alias(alias_id, distinct_id)
+    Client.create_alias(alias_id, distinct_id)
   end
 end

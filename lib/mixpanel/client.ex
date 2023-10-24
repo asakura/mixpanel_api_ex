@@ -7,24 +7,45 @@ defmodule Mixpanel.Client do
 
   require Logger
 
+  @type token :: String.t()
+  @type active :: boolean
+  @type base_url :: String.t()
+  @type option :: {:token, token} | {:active, active} | {:base_url, base_url}
+  @type init_args :: [option | GenServer.option(), ...]
+  @type state :: %{
+          required(:token) => token,
+          required(:active) => active,
+          required(:base_url) => base_url
+        }
+
+  @type event :: String.t() | map
+  @type properties :: map
+  @type alias_id :: String.t()
+  @type distinct_id :: String.t()
+
   @base_url "https://api.mixpanel.com"
   @track_endpoint "/track"
   @engage_endpoint "/engage"
   @alias_endpoint "/track#identity-create-alias"
   @max_attempts 3
 
-  @spec start_link(keyword) :: :ignore | {:error, any} | {:ok, pid}
+  @spec start_link(init_args) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(init_args) do
     {opts, gen_server_opts} = Keyword.split(init_args, [:token, :active, :base_url])
 
     GenServer.start_link(__MODULE__, opts, gen_server_opts)
   end
 
+  @spec child_spec(init_args) :: %{
+          id: __MODULE__,
+          start: {__MODULE__, :start_link, [init_args, ...]}
+        }
   def child_spec(init_args) do
     init_args =
       init_args
       |> Keyword.put_new(:name, __MODULE__)
       |> Keyword.put_new(:base_url, @base_url)
+      |> Keyword.put_new(:active, true)
 
     %{
       id: __MODULE__,
@@ -37,7 +58,7 @@ defmodule Mixpanel.Client do
 
   See `Mixpanel.track/3`
   """
-  @spec track(String.t(), map) :: :ok
+  @spec track(event, properties) :: :ok
   def track(event, properties) do
     GenServer.cast(__MODULE__, {:track, event, properties})
   end
@@ -47,7 +68,7 @@ defmodule Mixpanel.Client do
 
   See `Mixpanel.engage/4`.
   """
-  @spec engage(map | [map]) :: :ok
+  @spec engage(event | [event]) :: :ok
   def engage(event) do
     GenServer.cast(__MODULE__, {:engage, event})
   end
@@ -57,15 +78,34 @@ defmodule Mixpanel.Client do
 
   See `Mixpanel.create_alias/2`.
   """
-  @spec create_alias(String.t(), String.t()) :: :ok
+  @spec create_alias(alias_id, distinct_id) :: :ok
   def create_alias(alias, distinct_id) do
     GenServer.cast(__MODULE__, {:create_alias, alias, distinct_id})
   end
 
-  def init(config) do
-    {:ok, Enum.into(config, %{})}
+  @impl GenServer
+  @spec init([option, ...]) :: {:ok, state}
+  def init(opts) do
+    token = Keyword.fetch!(opts, :token)
+    active = Keyword.fetch!(opts, :active)
+    base_url = Keyword.fetch!(opts, :base_url)
+
+    {:ok,
+     %{
+       token: token,
+       active: active,
+       base_url: base_url
+     }}
   end
 
+  @spec handle_cast(
+          {:track, event, properties}
+          | {:engage, event}
+          | {:create_alias, alias_id, distinct_id},
+          state
+        ) :: {:noreply, state}
+
+  @impl GenServer
   def handle_cast({:track, event, properties}, %{token: token, active: true} = state) do
     data =
       %{event: event, properties: Map.put(properties, :token, token)}
@@ -85,6 +125,7 @@ defmodule Mixpanel.Client do
     {:noreply, state}
   end
 
+  @impl GenServer
   def handle_cast({:engage, event}, %{token: token, active: true} = state) do
     data =
       event
@@ -103,6 +144,7 @@ defmodule Mixpanel.Client do
     {:noreply, state}
   end
 
+  @impl GenServer
   def handle_cast({:create_alias, alias, distinct_id}, %{token: token, active: true} = state) do
     data =
       %{
