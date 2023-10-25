@@ -108,3 +108,52 @@ defmodule Mixpanel.HTTP.HTTPoison do
     end
   end
 end
+
+defmodule Mixpanel.HTTP.Hackney do
+  @behaviour Mixpanel.HTTP
+
+  @impl Mixpanel.HTTP
+  @spec get(url :: String.t(), headers :: [{String.t(), binary}], opts :: keyword) ::
+          {:ok, status :: 200..599, headers :: [{String.t(), binary}], body :: term}
+          | {:error, String.t()}
+  def get(url, headers, opts) do
+    request(:get, url, headers, "", opts)
+  end
+
+  @impl Mixpanel.HTTP
+  @spec post(
+          url :: String.t(),
+          headers :: [{String.t(), binary}],
+          body :: term,
+          opts :: keyword
+        ) ::
+          {:ok, status :: 200..599, headers :: [{String.t(), binary}], body :: term}
+          | {:error, String.t()}
+  def post(url, body, headers, opts) do
+    request(:post, url, headers, body, opts)
+  end
+
+  defp request(method, url, headers, payload, opts) do
+    case :hackney.request(method, url, headers, payload, opts) do
+      {:ok, status_code, headers} ->
+        {:ok, status_code, headers, <<>>}
+
+      {:ok, status_code, headers, client} ->
+        max_length = Keyword.get(opts, :max_body_length, :infinity)
+
+        case :hackney.body(client, max_length) do
+          {:ok, body} ->
+            {:ok, status_code, headers, body}
+
+          {:error, _reason} = err ->
+            err
+        end
+
+      {:ok, {:maybe_redirect, _status_code, _headers, _client}} ->
+        {:error, "Redirect not supported"}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+end

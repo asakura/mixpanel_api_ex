@@ -68,6 +68,7 @@ defmodule Mixpanel.Mixfile do
   defp deps do
     [
       {:httpoison, "~> 2.1"},
+      {:hackney, "~> 1.20"},
       {:jason, "~> 1.4"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
