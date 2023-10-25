@@ -38,7 +38,7 @@ defmodule Mixpanel.HTTP do
   end
 
   def client() do
-    Application.get_env(:mixpanel_api_ex, :http_client, Mixpanel.HTTP.HTTPoison)
+    Application.get_env(:mixpanel_api_ex, :http_adapter, Mixpanel.HTTP.HTTPoison)
   end
 
   @spec retry(String.t(), (-> {:ok, any, any, any} | {:error, String.t()}), pos_integer) ::
@@ -109,51 +109,72 @@ defmodule Mixpanel.HTTP.HTTPoison do
   end
 end
 
-defmodule Mixpanel.HTTP.Hackney do
-  @behaviour Mixpanel.HTTP
+if Code.ensure_loaded?(:hackney) do
+  defmodule Mixpanel.HTTP.Hackney do
+    @moduledoc """
+    Adapter for [hackney](https://github.com/benoitc/hackney).
 
-  @impl Mixpanel.HTTP
-  @spec get(url :: String.t(), headers :: [{String.t(), binary}], opts :: keyword) ::
-          {:ok, status :: 200..599, headers :: [{String.t(), binary}], body :: term}
-          | {:error, String.t()}
-  def get(url, headers, opts) do
-    request(:get, url, headers, "", opts)
-  end
+    Remember to add `{:hackney, "~> 1.20"}` to dependencies (and `:hackney` to applications in `mix.exs`).
 
-  @impl Mixpanel.HTTP
-  @spec post(
-          url :: String.t(),
-          headers :: [{String.t(), binary}],
-          body :: term,
-          opts :: keyword
-        ) ::
-          {:ok, status :: 200..599, headers :: [{String.t(), binary}], body :: term}
-          | {:error, String.t()}
-  def post(url, body, headers, opts) do
-    request(:post, url, headers, body, opts)
-  end
+    ## Examples
 
-  defp request(method, url, headers, payload, opts) do
-    case :hackney.request(method, url, headers, payload, opts) do
-      {:ok, status_code, headers} ->
-        {:ok, status_code, headers, <<>>}
+    ```
+    # set globally in config/config.exs
+    config :mixpanel_api_ex, :http_adapter, Mixpanel.HTTP.Hackney
+    ```
 
-      {:ok, status_code, headers, client} ->
-        max_length = Keyword.get(opts, :max_body_length, :infinity)
+    ## Adapter specific options
 
-        case :hackney.body(client, max_length) do
-          {:ok, body} ->
-            {:ok, status_code, headers, body}
+    - `:max_body_length` - Max response body size in bytes. Actual response may
+      be bigger because hackney stops after the last chunk that surpasses
+      `:max_body_length`. Defaults to `:infinity`.
+    """
 
-          {:error, _reason} = err ->
-            err
-        end
+    @behaviour Mixpanel.HTTP
 
-      {:ok, {:maybe_redirect, _status_code, _headers, _client}} ->
-        {:error, "Redirect not supported"}
+    @impl Mixpanel.HTTP
+    @spec get(url :: String.t(), headers :: [{String.t(), binary}], opts :: keyword) ::
+            {:ok, status :: 200..599, headers :: [{String.t(), binary}], body :: term}
+            | {:error, String.t()}
+    def get(url, headers, opts) do
+      request(:get, url, headers, "", opts)
+    end
 
-      {:error, reason} ->
-        {:error, reason}
+    @impl Mixpanel.HTTP
+    @spec post(
+            url :: String.t(),
+            headers :: [{String.t(), binary}],
+            body :: term,
+            opts :: keyword
+          ) ::
+            {:ok, status :: 200..599, headers :: [{String.t(), binary}], body :: term}
+            | {:error, String.t()}
+    def post(url, body, headers, opts) do
+      request(:post, url, headers, body, opts)
+    end
+
+    defp request(method, url, headers, payload, opts) do
+      case :hackney.request(method, url, headers, payload, opts) do
+        {:ok, status_code, headers} ->
+          {:ok, status_code, headers, <<>>}
+
+        {:ok, status_code, headers, client} ->
+          max_length = Keyword.get(opts, :max_body_length, :infinity)
+
+          case :hackney.body(client, max_length) do
+            {:ok, body} ->
+              {:ok, status_code, headers, body}
+
+            {:error, _reason} = err ->
+              err
+          end
+
+        {:ok, {:maybe_redirect, _status_code, _headers, _client}} ->
+          {:error, "Redirect not supported"}
+
+        {:error, reason} ->
+          {:error, reason}
+      end
     end
   end
 end
