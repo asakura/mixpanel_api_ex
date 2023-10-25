@@ -19,7 +19,7 @@ defmodule Mixpanel.HTTP do
   @spec get(url :: String.t(), headers :: [{String.t(), binary}], opts :: keyword) ::
           {:ok, status :: 200..599, headers :: [{String.t(), binary}], body :: term}
           | :ignore
-  def get(url, headers, opts) do
+  def get(url, headers \\ [], opts \\ []) do
     client = client()
     retry(url, fn -> client.get(url, headers, opts) end, @max_retries)
   end
@@ -32,7 +32,7 @@ defmodule Mixpanel.HTTP do
         ) ::
           {:ok, status :: 200..599, headers :: [{String.t(), binary}], body :: term}
           | :ignore
-  def post(url, body, headers, opts) do
+  def post(url, body, headers \\ [], opts \\ []) do
     client = client()
     retry(url, fn -> client.post(url, body, headers, opts) end, @max_retries)
   end
@@ -52,12 +52,20 @@ defmodule Mixpanel.HTTP do
       {:ok, 200, _headers, "1"} = ok ->
         ok
 
-      {:error, reason} ->
+      other ->
         attempt = @max_retries - (attempts_left + 1)
 
-        Logger.warning(
-          "Retrying Mixpanel request: attempt=#{attempt}, url=#{inspect(url)}, error=#{inspect(reason)}"
-        )
+        case other do
+          {:ok, status, _headers, _body} ->
+            Logger.warning(
+              "Retrying Mixpanel request: attempt=#{attempt}, url=#{inspect(url)}, status=#{inspect(status)}"
+            )
+
+          {:error, reason} ->
+            Logger.warning(
+              "Retrying Mixpanel request: attempt=#{attempt}, url=#{inspect(url)}, error=#{inspect(reason)}"
+            )
+        end
 
         retry(url, fun, attempts_left - 1)
     end
@@ -90,8 +98,8 @@ defmodule Mixpanel.HTTP.HTTPoison do
         ) ::
           {:ok, status :: 200..599, headers :: [{String.t(), binary}], body :: term}
           | {:error, String.t()}
-  def post(url, body, headers, opts) do
-    case HTTPoison.post(url, body, headers, opts) do
+  def post(url, body, headers, _opts) do
+    case HTTPoison.post(url, body, headers) do
       {:ok, %HTTPoison.Response{status_code: status, headers: headers, body: body}} ->
         {:ok, status, headers, body}
 
