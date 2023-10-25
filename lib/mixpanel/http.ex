@@ -1,4 +1,8 @@
 defmodule Mixpanel.HTTP do
+  @moduledoc """
+  Adapter specification for HTTP clients and API for accessing them.
+  """
+
   require Logger
 
   @max_retries 3
@@ -73,6 +77,10 @@ defmodule Mixpanel.HTTP do
 end
 
 defmodule Mixpanel.HTTP.HTTPoison do
+  @moduledoc """
+  Adapter for [HTTPoison](https://github.com/edgurgel/httpoison).
+  """
+
   @behaviour Mixpanel.HTTP
 
   @impl Mixpanel.HTTP
