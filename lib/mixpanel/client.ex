@@ -112,7 +112,7 @@ defmodule Mixpanel.Client do
       |> Jason.encode!()
       |> :base64.encode()
 
-    case perform(state.base_url <> @track_endpoint, data) do
+    case perform_get(state.base_url <> @track_endpoint, data) do
       :ok ->
         :ok
 
@@ -133,7 +133,7 @@ defmodule Mixpanel.Client do
       |> Jason.encode!()
       |> :base64.encode()
 
-    case perform(state.base_url <> @engage_endpoint, data) do
+    case perform_get(state.base_url <> @engage_endpoint, data) do
       :ok ->
         :ok
 
@@ -158,10 +158,10 @@ defmodule Mixpanel.Client do
       |> Jason.encode!()
       |> :base64.encode()
 
-    case HTTPoison.post(state.base_url <> @alias_endpoint, "data=#{data}", [
+    case perform_post(state.base_url <> @alias_endpoint, "data=#{data}", [
            {"Content-Type", "application/x-www-form-urlencoded"}
          ]) do
-      {:ok, %HTTPoison.Response{status_code: 200, body: "1"}} ->
+      :ok ->
         :ok
 
       other ->
@@ -184,13 +184,13 @@ defmodule Mixpanel.Client do
   defp put_token(event, token),
     do: Map.put(event, :"$token", token)
 
-  defp perform(url, data, max_attempts \\ @max_attempts)
+  defp perform_get(url, data, max_attempts \\ @max_attempts)
 
-  defp perform(_url, _data, 0) do
+  defp perform_get(_url, _data, 0) do
     :ignore
   end
 
-  defp perform(url, data, max_attempts) do
+  defp perform_get(url, data, max_attempts) do
     case HTTPoison.get(url, [], params: [data: data]) do
       {:ok, %HTTPoison.Response{status_code: 200, body: "1"}} ->
         :ok
@@ -210,7 +210,37 @@ defmodule Mixpanel.Client do
             )
         end
 
-        perform(url, data, max_attempts - 1)
+        perform_get(url, data, max_attempts - 1)
+    end
+  end
+
+  defp perform_post(url, data, headers, max_attempts \\ @max_attempts)
+
+  defp perform_post(_url, _data, _headers, 0) do
+    :ignore
+  end
+
+  defp perform_post(url, data, headers, max_attempts) do
+    case HTTPoison.post(url, data, headers) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: "1"}} ->
+        :ok
+
+      other ->
+        attempt = @max_attempts - (max_attempts + 1)
+
+        case other do
+          {:ok, %HTTPoison.Response{} = response} ->
+            Logger.warning(
+              "Retrying Mixpanel request: attempt=#{attempt}, url=#{inspect(url)}, response=#{inspect(response)}"
+            )
+
+          {:error, reason} ->
+            Logger.warning(
+              "Retrying Mixpanel request: attempt=#{attempt}, url=#{inspect(url)}, error=#{inspect(reason)}"
+            )
+        end
+
+        perform_post(url, data, headers, max_attempts - 1)
     end
   end
 end
