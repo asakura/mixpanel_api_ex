@@ -31,14 +31,14 @@ defmodule Mixpanel.HTTP do
   @spec post(
           url :: String.t(),
           headers :: [{String.t(), binary}],
-          body :: term,
+          payload :: term,
           opts :: keyword
         ) ::
           {:ok, status :: 200..599, headers :: [{String.t(), binary}], body :: term}
           | :ignore
-  def post(url, body, headers \\ [], opts \\ []) do
+  def post(url, payload, headers \\ [], opts \\ []) do
     client = impl()
-    retry(url, fn -> client.post(url, body, headers, opts) end, @max_retries)
+    retry(url, fn -> client.post(url, payload, headers, opts) end, @max_retries)
   end
 
   @spec impl() :: module

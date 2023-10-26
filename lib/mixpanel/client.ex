@@ -112,7 +112,7 @@ defmodule Mixpanel.Client do
       |> Jason.encode!()
       |> :base64.encode()
 
-    case HTTP.get(state.base_url <> @track_endpoint, [], data) do
+    case HTTP.get(state.base_url <> @track_endpoint, [], params: [data: data]) do
       {:ok, _, _, _} ->
         :ok
 
@@ -133,7 +133,7 @@ defmodule Mixpanel.Client do
       |> Jason.encode!()
       |> :base64.encode()
 
-    case HTTP.get(state.base_url <> @engage_endpoint, [], data) do
+    case HTTP.get(state.base_url <> @engage_endpoint, [], params: [data: data]) do
       {:ok, _, _, _} ->
         :ok
 
