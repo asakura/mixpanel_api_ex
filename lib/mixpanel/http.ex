@@ -43,7 +43,7 @@ defmodule Mixpanel.HTTP do
 
   @spec impl() :: module
   def impl() do
-    Application.get_env(:mixpanel_api_ex, :http_adapter, Mixpanel.HTTP.HTTPoison)
+    Application.get_env(:mixpanel_api_ex, :http_adapter, Mixpanel.HTTP.Hackney)
   end
 
   @spec retry(String.t(), (-> {:ok, any, any, any} | {:error, String.t()}), pos_integer) ::
@@ -73,47 +73,6 @@ defmodule Mixpanel.HTTP do
         end
 
         retry(url, fun, attempts_left - 1)
-    end
-  end
-end
-
-defmodule Mixpanel.HTTP.HTTPoison do
-  @moduledoc """
-  Adapter for [HTTPoison](https://github.com/edgurgel/httpoison).
-  """
-
-  @behaviour Mixpanel.HTTP
-
-  @impl Mixpanel.HTTP
-  @spec get(url :: String.t(), headers :: [{String.t(), binary}], opts :: keyword) ::
-          {:ok, status :: 200..599, headers :: [{String.t(), binary}], body :: term}
-          | {:error, String.t()}
-  def get(url, headers, opts) do
-    case HTTPoison.get(url, headers, opts) do
-      {:ok, %HTTPoison.Response{status_code: status, headers: headers, body: body}} ->
-        {:ok, status, headers, body}
-
-      {:error, %HTTPoison.Error{} = error} ->
-        {:error, HTTPoison.Error.message(error)}
-    end
-  end
-
-  @impl Mixpanel.HTTP
-  @spec post(
-          url :: String.t(),
-          headers :: [{String.t(), binary}],
-          body :: term,
-          opts :: keyword
-        ) ::
-          {:ok, status :: 200..599, headers :: [{String.t(), binary}], body :: term}
-          | {:error, String.t()}
-  def post(url, body, headers, _opts) do
-    case HTTPoison.post(url, body, headers) do
-      {:ok, %HTTPoison.Response{status_code: status, headers: headers, body: body}} ->
-        {:ok, status, headers, body}
-
-      {:error, %HTTPoison.Error{} = error} ->
-        {:error, HTTPoison.Error.message(error)}
     end
   end
 end
