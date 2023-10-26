@@ -1,4 +1,6 @@
 defmodule MixpanelTest.Plug do
+  @moduledoc false
+
   use Plug.Router
 
   import Plug.Conn

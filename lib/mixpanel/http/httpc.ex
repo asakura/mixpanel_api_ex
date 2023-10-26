@@ -1,5 +1,11 @@
 if Code.ensure_loaded?(:httpc) do
   defmodule Mixpanel.HTTP.HTTPC do
+    @moduledoc """
+    Adapter for [httpc](http://erlang.org/doc/man/httpc.html).
+
+    This is the default adapter.
+    """
+
     @behaviour Mixpanel.HTTP
 
     @impl Mixpanel.HTTP

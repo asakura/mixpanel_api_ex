@@ -8,7 +8,7 @@ defmodule MixpanelTest.HTTPTest do
         Bandit,
         plug: MixpanelTest.Plug,
         scheme: :https,
-        port: 40010,
+        port: 40_010,
         cipher_suite: :strong,
         otp_app: :mixpanel_api_ex,
         certfile: "priv/cert/selfsigned.pem",
