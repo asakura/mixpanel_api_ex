@@ -69,8 +69,9 @@ defmodule Mixpanel.Mixfile do
     [
       {:httpoison, "~> 2.1"},
       {:hackney, "~> 1.20"},
-      {:mox, "~> 1.1", only: [:test]},
-      {:bandit, "~> 1.0", only: [:test]},
+      {:mox, "~> 1.1", only: :test},
+      {:machete, "~> 0.2", only: :test},
+      {:bandit, "~> 1.0", only: :test},
       {:jason, "~> 1.4"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
