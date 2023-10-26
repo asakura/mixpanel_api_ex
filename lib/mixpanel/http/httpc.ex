@@ -56,7 +56,7 @@ if Code.ensure_loaded?(:httpc) do
              prepare_headers(headers),
              content_type,
              payload,
-             http_opts
+             [{:autoredirect, false} | http_opts]
            ) do
         {:ok, {{_, status_code, _}, headers, body}} ->
           {:ok, status_code, format_headers(headers), body}
