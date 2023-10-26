@@ -47,8 +47,6 @@ defmodule Mixpanel do
       |> track_put_ip(Keyword.get(opts, :ip))
 
     Client.track(event, properties)
-
-    :ok
   end
 
   defp track_put_time(properties, nil), do: properties
@@ -97,8 +95,6 @@ defmodule Mixpanel do
     distinct_id
     |> build_engage_event(operation, value, opts)
     |> Client.engage()
-
-    :ok
   end
 
   @spec batch_engage([{Client.distinct_id(), String.t(), map}], keyword) :: :ok
@@ -109,8 +105,6 @@ defmodule Mixpanel do
       end
 
     Client.engage(events)
-
-    :ok
   end
 
   defp build_engage_event(distinct_id, operation, value, opts) do
