@@ -1,4 +1,4 @@
-name: Runs on master branch or on open pull requests that are ready for review
+name: Elixir CI
 
 on:
   push:
