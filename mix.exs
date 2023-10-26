@@ -8,6 +8,7 @@ defmodule Mixpanel.Mixfile do
       app: :mixpanel_api_ex,
       version: @version,
       elixir: "~> 1.15",
+      elixirc_paths: elixirc_paths(Mix.env()),
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -47,6 +48,9 @@ defmodule Mixpanel.Mixfile do
   def description do
     "Elixir client for the Mixpanel API."
   end
+
+  defp elixirc_paths(:test), do: ["test/support", "lib"]
+  defp elixirc_paths(_), do: ["lib"]
 
   def package do
     [
