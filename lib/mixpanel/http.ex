@@ -43,7 +43,7 @@ defmodule Mixpanel.HTTP do
 
   @spec impl() :: module
   def impl() do
-    Application.get_env(:mixpanel_api_ex, :http_adapter, Mixpanel.HTTP.Hackney)
+    Application.get_env(:mixpanel_api_ex, :http_adapter, Mixpanel.HTTP.HTTPC)
   end
 
   @spec retry(String.t(), (-> {:ok, any, any, any} | {:error, String.t()}), pos_integer) ::
