@@ -24,7 +24,7 @@ defmodule Mixpanel.HTTP do
           {:ok, status :: 200..599, headers :: [{String.t(), binary}], body :: term}
           | :ignore
   def get(url, headers \\ [], opts \\ []) do
-    client = client()
+    client = impl()
     retry(url, fn -> client.get(url, headers, opts) end, @max_retries)
   end
 
@@ -37,11 +37,12 @@ defmodule Mixpanel.HTTP do
           {:ok, status :: 200..599, headers :: [{String.t(), binary}], body :: term}
           | :ignore
   def post(url, body, headers \\ [], opts \\ []) do
-    client = client()
+    client = impl()
     retry(url, fn -> client.post(url, body, headers, opts) end, @max_retries)
   end
 
-  def client() do
+  @spec impl() :: module
+  def impl() do
     Application.get_env(:mixpanel_api_ex, :http_adapter, Mixpanel.HTTP.HTTPoison)
   end
 
