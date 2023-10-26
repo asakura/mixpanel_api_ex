@@ -1,11 +1,11 @@
 # Mixpanel
 
-[![CI](https://github.com/asakura/mixpanel_api_ex/actions/workflows/test.yml/badge.svg)](https://github.com/asakura/mixpanel_api_ex/actions/workflows/test.yml)
 [![Module Version](https://img.shields.io/hexpm/v/mixpanel_api_ex.svg)](https://hex.pm/packages/mixpanel_api_ex)
 [![Hex Docs](https://img.shields.io/badge/hex-docs-lightgreen.svg)](https://hexdocs.pm/mixpanel_api_ex/)
 [![Total Downloads](https://img.shields.io/hexpm/dt/mixpanel_api_ex.svg)](https://hex.pm/packages/mixpanel_api_ex)
 [![License](https://img.shields.io/hexpm/l/mixpanel_api_ex.svg)](https://github.com/asakura/mixpanel_api_ex/blob/master/LICENSE)
 [![Last Updated](https://img.shields.io/github/last-commit/asakura/mixpanel_api_ex.svg)](https://github.com/asakura/mixpanel_api_ex/commits/master)
+[![CI](https://github.com/asakura/mixpanel_api_ex/actions/workflows/elixir.yml/badge.svg)](https://github.com/asakura/mixpanel_api_ex/actions)
 
 Elixir client for the Mixpanel API.
 
