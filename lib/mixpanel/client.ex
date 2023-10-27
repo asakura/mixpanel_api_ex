@@ -120,9 +120,7 @@ defmodule Mixpanel.Client do
         :ok
 
       _ ->
-        Logger.warning(
-          "Problem tracking Mixpanel event: #{inspect(event)}, #{inspect(properties)}"
-        )
+        Logger.warning(%{message: "Problem tracking event", event: event, properties: properties})
     end
 
     {:noreply, state}
@@ -141,7 +139,7 @@ defmodule Mixpanel.Client do
         :ok
 
       _ ->
-        Logger.warning("Problem tracking Mixpanel profile update: #{inspect(event)}")
+        Logger.warning(%{message: "Problem tracking profile update", event: event})
     end
 
     {:noreply, state}
@@ -175,9 +173,11 @@ defmodule Mixpanel.Client do
         :ok
 
       :ignore ->
-        Logger.warning(
-          "Problem creating Mixpanel alias: alias=#{inspect(alias)}, distinct_id=#{inspect(distinct_id)}"
-        )
+        Logger.warning(%{
+          message: "Problem creating profile alias",
+          alias: alias,
+          distinct_id: distinct_id
+        })
     end
 
     {:noreply, state}

@@ -62,14 +62,20 @@ defmodule Mixpanel.HTTP do
 
         case other do
           {:ok, status, _headers, _body} ->
-            Logger.warning(
-              "Retrying Mixpanel request: attempt=#{attempt}, url=#{inspect(url)}, status=#{inspect(status)}"
-            )
+            Logger.warning(%{
+              message: "Retrying request",
+              attempt: attempt,
+              url: url,
+              status: status
+            })
 
           {:error, reason} ->
-            Logger.warning(
-              "Retrying Mixpanel request: attempt=#{attempt}, url=#{inspect(url)}, error=#{inspect(reason)}"
-            )
+            Logger.warning(%{
+              message: "Retrying request",
+              attempt: attempt,
+              url: url,
+              error: reason
+            })
         end
 
         retry(url, fun, attempts_left - 1)
