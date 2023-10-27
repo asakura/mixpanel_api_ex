@@ -57,7 +57,7 @@ defmodule Mixpanel.Mixfile do
   def package do
     [
       maintainers: ["Mikalai Seva"],
-      licenses: ["The MIT License"],
+      licenses: ["MIT"],
       links: %{"GitHub" => "https://github.com/asakura/mixpanel_api_ex"},
       files: ~w(mix.exs README.md CHANGELOG.md lib)
     ]
