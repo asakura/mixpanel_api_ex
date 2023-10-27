@@ -13,7 +13,7 @@ defmodule Mixpanel.HTTP do
 
   @callback post(
               url :: String.t(),
-              body :: term,
+              body :: binary,
               headers :: [{String.t(), binary}],
               opts :: keyword
             ) ::
@@ -30,8 +30,8 @@ defmodule Mixpanel.HTTP do
 
   @spec post(
           url :: String.t(),
+          payload :: binary,
           headers :: [{String.t(), binary}],
-          payload :: term,
           opts :: keyword
         ) ::
           {:ok, status :: 200..599, headers :: [{String.t(), binary}], body :: term}

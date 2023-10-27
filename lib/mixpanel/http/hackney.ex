@@ -32,8 +32,8 @@ if Code.ensure_loaded?(:hackney) do
     @impl Mixpanel.HTTP
     @spec post(
             url :: String.t(),
+            body :: binary,
             headers :: [{String.t(), binary}],
-            body :: term,
             opts :: keyword
           ) ::
             {:ok, status :: 200..599, headers :: [{String.t(), binary}], body :: term}
