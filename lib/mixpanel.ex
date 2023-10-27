@@ -57,48 +57,17 @@ defmodule Mixpanel do
       function.
 
   """
-  @spec track(Client.event(), Client.properties(), [track_options]) :: :ok
+  @spec track(Client.event(), Client.properties(), track_options) :: :ok
   def track(event, properties \\ %{}, opts \\ []) do
     properties =
       properties
-      |> track_put_time(Keyword.get(opts, :time))
-      |> track_put_distinct_id(Keyword.get(opts, :distinct_id))
-      |> track_put_ip(Keyword.get(opts, :ip))
+      |> Map.drop([:distinct_id, :ip, :time])
+      |> maybe_put(:time, to_timestamp(Keyword.get(opts, :time)))
+      |> maybe_put(:distinct_id, Keyword.get(opts, :distinct_id))
+      |> maybe_put(:ip, convert_ip(Keyword.get(opts, :ip)))
 
     Client.track(event, properties)
   end
-
-  defp track_put_time(properties, nil),
-    do: properties
-
-  defp track_put_time(properties, secs) when is_integer(secs),
-    do: Map.put(properties, :time, secs)
-
-  defp track_put_time(properties, %NaiveDateTime{} = dt),
-    do: Map.put(properties, :time, dt |> DateTime.from_naive!("Etc/UTC") |> DateTime.to_unix())
-
-  defp track_put_time(properties, %DateTime{} = dt),
-    do: Map.put(properties, :time, DateTime.to_unix(dt))
-
-  defp track_put_time(properties, {{_y, _mon, _d}, {_h, _m, _s}} = dt) do
-    ts =
-      dt
-      |> :calendar.datetime_to_gregorian_seconds()
-      |> Kernel.-(unquote(:calendar.datetime_to_gregorian_seconds({{1970, 1, 1}, {0, 0, 0}})))
-
-    Map.put(properties, :time, ts)
-  end
-
-  defp track_put_time(properties, {mega_secs, secs, _ms}),
-    do: Map.put(properties, :time, mega_secs * 1_000_000 + secs)
-
-  defp track_put_distinct_id(properties, nil), do: properties
-
-  defp track_put_distinct_id(properties, distinct_id),
-    do: Map.put(properties, :distinct_id, distinct_id)
-
-  defp track_put_ip(properties, nil), do: properties
-  defp track_put_ip(properties, ip), do: Map.put(properties, :ip, convert_ip(ip))
 
   @doc """
   Stores a user profile
@@ -145,26 +114,10 @@ defmodule Mixpanel do
   defp build_engage_event(distinct_id, operation, value, opts) do
     %{"$distinct_id": distinct_id}
     |> Map.put(operation, value)
-    |> engage_put_ip(Keyword.get(opts, :ip))
-    |> engage_put_time(Keyword.get(opts, :time))
-    |> engage_put_ignore_time(Keyword.get(opts, :ignore_time))
+    |> maybe_put(:"$ip", convert_ip(Keyword.get(opts, :ip)))
+    |> maybe_put(:"$time", to_timestamp(Keyword.get(opts, :time)))
+    |> maybe_put(:"$ignore_time", Keyword.get(opts, :ignore_time, nil) == true)
   end
-
-  defp engage_put_ip(event, nil), do: event
-  defp engage_put_ip(event, ip), do: Map.put(event, :"$ip", convert_ip(ip))
-
-  defp engage_put_time(event, nil), do: event
-
-  defp engage_put_time(event, {mega_secs, secs, _ms}),
-    do: engage_put_time(event, mega_secs * 10_000 + secs)
-
-  defp engage_put_time(event, secs) when is_integer(secs), do: Map.put(event, :"$time", secs)
-
-  defp engage_put_ignore_time(event, true), do: Map.put(event, :"$ignore_time", "true")
-  defp engage_put_ignore_time(event, _), do: event
-
-  defp convert_ip({a, b, c, d}), do: "#{a}.#{b}.#{c}.#{d}"
-  defp convert_ip(ip), do: ip
 
   @doc """
   Creates an alias for a distinct ID, merging two profiles. Mixpanel supports
@@ -184,4 +137,40 @@ defmodule Mixpanel do
   def create_alias(alias_id, distinct_id) do
     Client.create_alias(alias_id, distinct_id)
   end
+
+  @spec maybe_put(Map.t(), any, any) :: Map.t()
+  defp maybe_put(map, _key, nil), do: map
+  defp maybe_put(map, key, value), do: Map.put(map, key, value)
+
+  @spec to_timestamp(
+          nil
+          | DateTime.t()
+          | NaiveDateTime.t()
+          | :erlang.timestamp()
+          | :calendar.datetime()
+          | pos_integer()
+        ) :: pos_integer
+  defp to_timestamp(nil), do: nil
+
+  defp to_timestamp(secs) when is_integer(secs),
+    do: secs
+
+  defp to_timestamp(%NaiveDateTime{} = dt),
+    do: dt |> DateTime.from_naive!("Etc/UTC") |> DateTime.to_unix()
+
+  defp to_timestamp(%DateTime{} = dt),
+    do: DateTime.to_unix(dt)
+
+  defp to_timestamp({{_y, _mon, _d}, {_h, _m, _s}} = dt),
+    do:
+      dt
+      |> :calendar.datetime_to_gregorian_seconds()
+      |> Kernel.-(unquote(:calendar.datetime_to_gregorian_seconds({{1970, 1, 1}, {0, 0, 0}})))
+
+  defp to_timestamp({mega_secs, secs, _ms}),
+    do: mega_secs * 1_000_000 + secs
+
+  @spec convert_ip({1..255, 1..255, 1..255, 1..255}) :: String.t()
+  defp convert_ip({a, b, c, d}), do: "#{a}.#{b}.#{c}.#{d}"
+  defp convert_ip(ip), do: ip
 end
