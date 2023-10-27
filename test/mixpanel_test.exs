@@ -1,5 +1,6 @@
 defmodule MixpanelTest do
   use ExUnit.Case
+  use Machete
 
   import ExUnit.CaptureLog
   import Mox
@@ -63,15 +64,65 @@ defmodule MixpanelTest do
       :timer.sleep(50)
     end
 
-    test "track/3 with IP and timestamp" do
-      Mixpanel.track(
-        "Level Complete",
-        %{"Level Number" => 9},
+    test "track/3 with IP" do
+      Mixpanel.track("Level Complete", %{"Level Number" => 9},
         distinct_id: "13793",
-        time: 1_358_208_000,
         ip: "203.0.113.9"
       )
 
+      :timer.sleep(50)
+    end
+  end
+
+  describe "tracks an event with time" do
+    setup do
+      Mixpanel.HTTP.Mock
+      |> expect(:get, fn url, _headers, opts ->
+        assert url =~ ~r</track$>
+        [data: data] = Keyword.get(opts, :params)
+
+        data =
+          data
+          |> :base64.decode()
+          |> Jason.decode!()
+
+        assert data
+               ~> %{
+                 "event" => string(),
+                 "properties" => %{
+                   "time" => 1_358_208_000,
+                   "token" => string()
+                 }
+               }
+
+        {:ok, 200, [], "1"}
+      end)
+
+      :ok
+    end
+
+    test "track/3 handles NaiveDatetime" do
+      Mixpanel.track("Level Complete", %{}, time: ~N[2013-01-15 00:00:00])
+      :timer.sleep(50)
+    end
+
+    test "track/3 handles Datetime" do
+      Mixpanel.track("Level Complete", %{}, time: ~U[2013-01-15 00:00:00Z])
+      :timer.sleep(50)
+    end
+
+    test "track/3 handles Unix timestamps" do
+      Mixpanel.track("Level Complete", %{}, time: 1_358_208_000)
+      :timer.sleep(50)
+    end
+
+    test "track/3 handles Erlang calendar timestamps" do
+      Mixpanel.track("Level Complete", %{}, time: {{2013, 01, 15}, {00, 00, 00}})
+      :timer.sleep(50)
+    end
+
+    test "track/3 handles Erlang timestamps" do
+      Mixpanel.track("Level Complete", %{}, time: {1358, 208_000, 0})
       :timer.sleep(50)
     end
   end

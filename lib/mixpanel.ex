@@ -3,6 +3,40 @@ defmodule Mixpanel do
 
   alias Mixpanel.Client
 
+  @typedoc """
+  Possible options to be passed to `Mixpanel.track/3`.
+
+  * `:distinct_id` - The value of distinct_id will be treated as a string, and
+    used to uniquely identify a user associated with your event. If you provide
+    a distinct_id with your events, you can track a given user through funnels
+    and distinguish unique users for retention analyses. You should always send
+    the same distinct_id when an event is triggered by the same user.
+
+  * `:time` - The time an event occurred. If this property is not included in
+    your request, Mixpanel will use the time the event arrives at the server.
+    If present, the value should be one of:
+    * `NaiveDateTime` struct (Etc/UTC timezone is assumed)
+    * `DateTime` struct
+    * a Unix timestamp (seconds since midnight, January 1st, 1970 - UTC)
+    * an Erlang's `:erlang.timestamp()` tuple (`{mega_secs, secs, ms}`,
+    microseconds are not supported)
+    * an Erlang's `:calendar.datetime()` tuple (`{{yyyy, mm, dd}, {hh, mm, ss}}`)
+  * `:ip` - An IP address string (e.g. "127.0.0.1") associated with the event.
+  This is used for adding geolocation data to events, and should only be
+  required if you are making requests from your backend. If `:ip` is absent,
+  Mixpanel will ignore the IP address of the request.
+  """
+  @type track_options :: [
+          time:
+            DateTime.t()
+            | NaiveDateTime.t()
+            | :erlang.timestamp()
+            | :calendar.datetime()
+            | pos_integer(),
+          distinct_id: String.t(),
+          ip: String.t()
+        ]
+
   @moduledoc """
   Elixir client for the Mixpanel API.
   """
@@ -17,28 +51,13 @@ defmodule Mixpanel do
 
   ## Arguments
 
-    * `event`      - A name for the event
+    * `event` - A name for the event
     * `properties` - A collection of properties associated with this event.
-    * `opts`       - The options
+    * `opts` - See `t:track_options/0` for specific options to pass to this
+      function.
 
-  ## Options
-
-    * `:distinct_id` - The value of distinct_id will be treated as a string, and
-      used to uniquely identify a user associated with your event. If you
-      provide a distinct_id property with your events, you can track a given
-      user through funnels and distinguish unique users for retention analyses.
-      You should always send the same distinct_id when an event is triggered by
-      the same user.
-    * `:time` - The time an event occurred. If present, the value should be a
-      unix timestamp (seconds since midnight, January 1st, 1970 - UTC). If this
-      property is not included in your request, Mixpanel will use the time the
-      event arrives at the server.
-    * `:ip` - An IP address string (e.g. "127.0.0.1") associated with the event.
-      This is used for adding geolocation data to events, and should only be
-      required if you are making requests from your backend. If `:ip` is absent,
-      Mixpanel will ignore the IP address of the request.
   """
-  @spec track(Client.event(), Client.properties(), keyword) :: :ok
+  @spec track(Client.event(), Client.properties(), [track_options]) :: :ok
   def track(event, properties \\ %{}, opts \\ []) do
     properties =
       properties
@@ -49,13 +68,29 @@ defmodule Mixpanel do
     Client.track(event, properties)
   end
 
-  defp track_put_time(properties, nil), do: properties
-
-  defp track_put_time(properties, {mega_secs, secs, _ms}),
-    do: track_put_time(properties, mega_secs * 10_000 + secs)
+  defp track_put_time(properties, nil),
+    do: properties
 
   defp track_put_time(properties, secs) when is_integer(secs),
     do: Map.put(properties, :time, secs)
+
+  defp track_put_time(properties, %NaiveDateTime{} = dt),
+    do: Map.put(properties, :time, dt |> DateTime.from_naive!("Etc/UTC") |> DateTime.to_unix())
+
+  defp track_put_time(properties, %DateTime{} = dt),
+    do: Map.put(properties, :time, DateTime.to_unix(dt))
+
+  defp track_put_time(properties, {{_y, _mon, _d}, {_h, _m, _s}} = dt) do
+    ts =
+      dt
+      |> :calendar.datetime_to_gregorian_seconds()
+      |> Kernel.-(unquote(:calendar.datetime_to_gregorian_seconds({{1970, 1, 1}, {0, 0, 0}})))
+
+    Map.put(properties, :time, ts)
+  end
+
+  defp track_put_time(properties, {mega_secs, secs, _ms}),
+    do: Map.put(properties, :time, mega_secs * 1_000_000 + secs)
 
   defp track_put_distinct_id(properties, nil), do: properties
 
