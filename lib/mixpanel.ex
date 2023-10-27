@@ -59,7 +59,7 @@ defmodule Mixpanel do
   """
   @spec track(Client.event(), Client.properties(), track_options) :: :ok
   def track(event, properties \\ %{}, opts \\ []) do
-    validate_options(opts, [:distinct_id, :ip, :time], :opts)
+    opts = validate_options(opts, [:distinct_id, :ip, :time], :opts)
 
     properties =
       properties
@@ -98,7 +98,7 @@ defmodule Mixpanel do
   """
   @spec engage(Client.distinct_id(), String.t(), map, keyword) :: :ok
   def engage(distinct_id, operation, value \\ %{}, opts \\ []) do
-    validate_options(opts, [:ip, :time, :ignore_time], :opts)
+    opts = validate_options(opts, [:ip, :time, :ignore_time], :opts)
 
     distinct_id
     |> build_engage_event(operation, value, opts)
@@ -107,7 +107,7 @@ defmodule Mixpanel do
 
   @spec batch_engage([{Client.distinct_id(), String.t(), map}], keyword) :: :ok
   def batch_engage(list, opts \\ []) do
-    validate_options(opts, [:ip, :time, :ignore_time], :opts)
+    opts = validate_options(opts, [:ip, :time, :ignore_time], :opts)
 
     events =
       for {distinct_id, operation, value} <- list do
@@ -144,10 +144,6 @@ defmodule Mixpanel do
     Client.create_alias(alias_id, distinct_id)
   end
 
-  @spec maybe_put(Map.t(), any, any) :: Map.t()
-  defp maybe_put(map, _key, nil), do: map
-  defp maybe_put(map, key, value), do: Map.put(map, key, value)
-
   @spec to_timestamp(
           nil
           | DateTime.t()
@@ -155,7 +151,7 @@ defmodule Mixpanel do
           | :erlang.timestamp()
           | :calendar.datetime()
           | pos_integer()
-        ) :: pos_integer
+        ) :: nil | non_neg_integer
   defp to_timestamp(nil), do: nil
 
   defp to_timestamp(secs) when is_integer(secs),
@@ -174,11 +170,19 @@ defmodule Mixpanel do
       |> Kernel.-(unquote(:calendar.datetime_to_gregorian_seconds({{1970, 1, 1}, {0, 0, 0}})))
 
   defp to_timestamp({mega_secs, secs, _ms}),
-    do: mega_secs * 1_000_000 + secs
+    do: trunc(mega_secs * 1_000_000 + secs)
 
   @spec convert_ip({1..255, 1..255, 1..255, 1..255}) :: String.t()
   defp convert_ip({a, b, c, d}), do: "#{a}.#{b}.#{c}.#{d}"
   defp convert_ip(ip), do: ip
+
+  @dialyzer {:nowarn_function, maybe_put: 3}
+
+  @spec maybe_put(map, any, any) :: map
+  defp maybe_put(map, _key, nil), do: map
+  defp maybe_put(map, key, value), do: Map.put(map, key, value)
+
+  @dialyzer {:nowarn_function, validate_options: 3}
 
   @spec validate_options(Keyword.t(), [atom(), ...], String.t() | atom()) ::
           Keyword.t() | no_return()

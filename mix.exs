@@ -14,7 +14,7 @@ defmodule Mixpanel.Mixfile do
       deps: deps(),
       dialyzer: [
         plt_add_deps: :apps_direct,
-        plt_add_apps: [:logger],
+        plt_add_apps: [:logger, :inets],
         flags: [
           "-Werror_handling",
           "-Wextra_return",
