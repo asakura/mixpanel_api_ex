@@ -92,10 +92,20 @@ defmodule Mixpanel do
     Client.track(event, properties)
   end
 
+  @doc """
+  Same as `f:engage/4`, but accepts a list of `{distinct_id, operation, value}`
+  tuples, then forms a batch request and send it the Ingestion API.
+
+  ## Arguments
+
+  * `batch` - See `f:engage/4` for details.
+  * `opts` - See `t:engage_options/0` for specific options to pass to this
+    function.
+  """
   @spec engage([{Client.distinct_id(), String.t(), map}], engage_options) :: :ok
-  def engage([{_, _, _} | _] = list, opts \\ []) do
+  def engage([{_, _, _} | _] = batch, opts \\ []) do
     opts = validate_options(opts, [:ip, :time, :ignore_time], :opts)
-    Client.engage(Enum.map(list, &build_engage_event(&1, opts)))
+    Client.engage(Enum.map(batch, &build_engage_event(&1, opts)))
   end
 
   @doc """
