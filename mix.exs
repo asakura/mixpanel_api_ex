@@ -73,7 +73,6 @@ defmodule Mixpanel.Mixfile do
 
   defp deps do
     [
-      {:httpoison, "~> 2.1"},
       {:hackney, "~> 1.20"},
       {:mox, "~> 1.1", only: :test},
       {:machete, "~> 0.2", only: :test},
