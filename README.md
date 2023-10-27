@@ -29,17 +29,17 @@ The package can be installed as:
   end
   ```
 
-  3. Ensure your Mixpanel token was placed in config file:
+  3. Ensure your Project Token was placed in config file:
   ```elixir
   config :mixpanel_api_ex, :config,
-     token: "<Put API token here>",
+     project_token: "<Put Project Token here>",
      active: true
   ```
 
   4. Disable sending requests to API for tests:
   ```elixir
   config :mixpanel_api_ex, :config,
-      token: "<Put API token here>",
+      project_token: "<Put Project Token here>",
       active: false
   ```
 

@@ -8,7 +8,7 @@ defmodule MixpanelTest do
   setup :verify_on_exit!
 
   setup do
-    pid = start_supervised!({Mixpanel.Client, [active: true, token: ""]})
+    pid = start_supervised!({Mixpanel.Client, [active: true, project_token: ""]})
 
     Mixpanel.HTTP.Mock
     |> allow(self(), pid)

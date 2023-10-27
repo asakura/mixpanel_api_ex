@@ -8,13 +8,13 @@ defmodule Mixpanel.Client do
   require Logger
   alias Mixpanel.HTTP
 
-  @type token :: String.t()
+  @type project_token :: String.t()
   @type active :: boolean
   @type base_url :: String.t()
-  @type option :: {:token, token} | {:active, active} | {:base_url, base_url}
+  @type option :: {:project_token, project_token} | {:active, active} | {:base_url, base_url}
   @type init_args :: [option | GenServer.option(), ...]
   @type state :: %{
-          required(:token) => token,
+          required(:project_token) => project_token,
           required(:active) => active,
           required(:base_url) => base_url
         }
@@ -31,7 +31,7 @@ defmodule Mixpanel.Client do
 
   @spec start_link(init_args) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(init_args) do
-    {opts, gen_server_opts} = Keyword.split(init_args, [:token, :active, :base_url])
+    {opts, gen_server_opts} = Keyword.split(init_args, [:project_token, :active, :base_url])
 
     GenServer.start_link(__MODULE__, opts, gen_server_opts)
   end
@@ -86,13 +86,13 @@ defmodule Mixpanel.Client do
   @impl GenServer
   @spec init([option, ...]) :: {:ok, state}
   def init(opts) do
-    token = Keyword.fetch!(opts, :token)
+    project_token = Keyword.fetch!(opts, :project_token)
     active = Keyword.fetch!(opts, :active)
     base_url = Keyword.fetch!(opts, :base_url)
 
     {:ok,
      %{
-       token: token,
+       project_token: project_token,
        active: active,
        base_url: base_url
      }}
@@ -106,9 +106,12 @@ defmodule Mixpanel.Client do
         ) :: {:noreply, state}
 
   @impl GenServer
-  def handle_cast({:track, event, properties}, %{token: token, active: true} = state) do
+  def handle_cast(
+        {:track, event, properties},
+        %{project_token: project_token, active: true} = state
+      ) do
     data =
-      %{event: event, properties: Map.put(properties, :token, token)}
+      %{event: event, properties: Map.put(properties, :token, project_token)}
       |> Jason.encode!()
       |> :base64.encode()
 
@@ -126,10 +129,10 @@ defmodule Mixpanel.Client do
   end
 
   @impl GenServer
-  def handle_cast({:engage, event}, %{token: token, active: true} = state) do
+  def handle_cast({:engage, event}, %{project_token: project_token, active: true} = state) do
     data =
       event
-      |> put_token(token)
+      |> put_token(project_token)
       |> Jason.encode!()
       |> :base64.encode()
 
@@ -145,12 +148,15 @@ defmodule Mixpanel.Client do
   end
 
   @impl GenServer
-  def handle_cast({:create_alias, alias, distinct_id}, %{token: token, active: true} = state) do
+  def handle_cast(
+        {:create_alias, alias, distinct_id},
+        %{project_token: project_token, active: true} = state
+      ) do
     data =
       %{
         event: "$create_alias",
         properties: %{
-          token: token,
+          token: project_token,
           alias: alias,
           distinct_id: distinct_id
         }
@@ -182,9 +188,9 @@ defmodule Mixpanel.Client do
     {:noreply, state}
   end
 
-  defp put_token(events, token) when is_list(events),
-    do: Enum.map(events, &put_token(&1, token))
+  defp put_token(events, project_token) when is_list(events),
+    do: Enum.map(events, &put_token(&1, project_token))
 
-  defp put_token(event, token),
-    do: Map.put(event, :"$token", token)
+  defp put_token(event, project_token),
+    do: Map.put(event, :"$token", project_token)
 end
