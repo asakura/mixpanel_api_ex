@@ -4,13 +4,8 @@ defmodule Mixpanel do
   alias Mixpanel.Client
 
   @typedoc """
-  Possible options to be passed to `Mixpanel.track/3`.
+  Possible common options to be passed to `Mixpanel.track/3` and `Mixpanel.engage/3`.
 
-  * `:distinct_id` - The value of distinct_id will be treated as a string, and
-    used to uniquely identify a user associated with your event. If you provide
-    a distinct_id with your events, you can track a given user through funnels
-    and distinguish unique users for retention analyses. You should always send
-    the same distinct_id when an event is triggered by the same user.
   * `:time` - The time an event occurred. If this property is not included in
     your request, Mixpanel will use the time the event arrives at the server.
     If present, the value should be one of:
@@ -25,16 +20,44 @@ defmodule Mixpanel do
     required if you are making requests from your backend. If `:ip` is absent,
     Mixpanel will ignore the IP address of the request.
   """
-  @type track_options :: [
+  @type common_options :: [
           time:
             DateTime.t()
             | NaiveDateTime.t()
             | :erlang.timestamp()
             | :calendar.datetime()
             | pos_integer(),
-          distinct_id: String.t(),
-          ip: String.t()
+          ip: {1..255, 0..255, 0..255, 0..255}
         ]
+
+  @typedoc """
+  Possible options to be passed to `Mixpanel.track/3`.
+
+  * `:distinct_id` - The value of distinct_id will be treated as a string, and
+    used to uniquely identify a user associated with your event. If you provide
+    a distinct_id with your events, you can track a given user through funnels
+    and distinguish unique users for retention analyses. You should always send
+    the same distinct_id when an event is triggered by the same user.
+  """
+  @type track_options ::
+          common_options
+          | [
+              distinct_id: String.t()
+            ]
+
+  @typedoc """
+  Possible options to be passed to `Mixpanel.engage/3`.
+
+  * `:ignore_time` - If the `:ignore_time` property is present and `true` in
+    your update request, Mixpanel will not automatically update the "Last Seen"
+    property of the profile. Otherwise, Mixpanel will add a "Last Seen" property
+    associated with the current time for all $set, $append, and $add operations.
+  """
+  @type engage_options ::
+          common_options
+          | [
+              ignore_time: boolean
+            ]
 
   @moduledoc """
   Elixir client for the Mixpanel API.
@@ -50,7 +73,7 @@ defmodule Mixpanel do
 
   ## Arguments
 
-  * `event` - A name for the event
+  * `event` - A name for the event.
   * `properties` - A collection of properties associated with this event.
   * `opts` - See `t:track_options/0` for specific options to pass to this
     function.
@@ -69,53 +92,34 @@ defmodule Mixpanel do
     Client.track(event, properties)
   end
 
+  @spec engage([{Client.distinct_id(), String.t(), map}], engage_options) :: :ok
+  def engage([{_, _, _} | _] = list, opts \\ []) do
+    opts = validate_options(opts, [:ip, :time, :ignore_time], :opts)
+    Client.engage(Enum.map(list, &build_engage_event(&1, opts)))
+  end
+
   @doc """
-  Stores a user profile
+  Takes a `value` map argument containing names and values of profile
+  properties. If the profile does not exist, it creates it with these
+  properties. If it does exist, it sets the properties to these values,
+  overwriting existing values.
 
   ## Arguments
 
-  * `distinct_id` - This is a string that identifies the profile you would like to update.
-  * `operation`   - A name for the event
-  * `value`       - A collection of properties associated with this event.
-  * `opts`        - The options
-
-  ## Options
-
-  * `:ip` - The IP address associated with a given profile. If `:ip` isn't
-    provided, Mixpanel will use the IP address of the request. Mixpanel uses an
-    IP address to guess at the geographic location of users. If `:ip` is set to
-    "0", Mixpanel will ignore IP information.
-  * `:time` - Seconds since midnight, January 1st 1970, UTC. Updates are applied
-    in `:time` order, so setting this value can lead to unexpected results
-    unless care is taken. If `:time` is not included in a request, Mixpanel will
-    use the time the update arrives at the Mixpanel server.
-  * `:ignore_time` - If the `:ignore_time` property is present and `true` in
-    your update request, Mixpanel will not automatically update the "Last Seen"
-    property of the profile. Otherwise, Mixpanel will add a "Last Seen" property
-    associated with the current time for all $set, $append, and $add operations.
+  * `distinct_id` - This is a string that identifies the profile you would like
+    to update.
+  * `operation` - A name for the event.
+  * `value`- A collection of properties associated with this event.
+  * `opts` - See `t:engage_options/0` for specific options to pass to this
+    function.
   """
-  @spec engage(Client.distinct_id(), String.t(), map, keyword) :: :ok
-  def engage(distinct_id, operation, value \\ %{}, opts \\ []) do
+  @spec engage(Client.distinct_id(), String.t(), map, engage_options) :: :ok
+  def engage(distinct_id, operation, value, opts \\ []) do
     opts = validate_options(opts, [:ip, :time, :ignore_time], :opts)
-
-    distinct_id
-    |> build_engage_event(operation, value, opts)
-    |> Client.engage()
+    Client.engage(build_engage_event({distinct_id, operation, value}, opts))
   end
 
-  @spec batch_engage([{Client.distinct_id(), String.t(), map}], keyword) :: :ok
-  def batch_engage(list, opts \\ []) do
-    opts = validate_options(opts, [:ip, :time, :ignore_time], :opts)
-
-    events =
-      for {distinct_id, operation, value} <- list do
-        build_engage_event(distinct_id, operation, value, opts)
-      end
-
-    Client.engage(events)
-  end
-
-  defp build_engage_event(distinct_id, operation, value, opts) do
+  defp build_engage_event({distinct_id, operation, value}, opts) do
     %{"$distinct_id": distinct_id}
     |> Map.put(operation, value)
     |> maybe_put(:"$ip", convert_ip(Keyword.get(opts, :ip)))

@@ -138,10 +138,10 @@ defmodule MixpanelTest do
       :ok
     end
 
-    test "engage/2" do
-      Mixpanel.engage("13793", "$set")
-      :timer.sleep(50)
-    end
+    # test "engage/2" do
+    #   Mixpanel.engage("13793", "$set")
+    #   :timer.sleep(50)
+    # end
 
     test "engage/3" do
       Mixpanel.engage("13793", "$set", %{"Address" => "1313 Mockingbird Lane"})
