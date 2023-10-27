@@ -59,6 +59,8 @@ defmodule Mixpanel do
   """
   @spec track(Client.event(), Client.properties(), track_options) :: :ok
   def track(event, properties \\ %{}, opts \\ []) do
+    validate_options(opts, [:distinct_id, :ip, :time], :opts)
+
     properties =
       properties
       |> Map.drop([:distinct_id, :ip, :time])
@@ -96,6 +98,8 @@ defmodule Mixpanel do
   """
   @spec engage(Client.distinct_id(), String.t(), map, keyword) :: :ok
   def engage(distinct_id, operation, value \\ %{}, opts \\ []) do
+    validate_options(opts, [:ip, :time, :ignore_time], :opts)
+
     distinct_id
     |> build_engage_event(operation, value, opts)
     |> Client.engage()
@@ -103,6 +107,8 @@ defmodule Mixpanel do
 
   @spec batch_engage([{Client.distinct_id(), String.t(), map}], keyword) :: :ok
   def batch_engage(list, opts \\ []) do
+    validate_options(opts, [:ip, :time, :ignore_time], :opts)
+
     events =
       for {distinct_id, operation, value} <- list do
         build_engage_event(distinct_id, operation, value, opts)
@@ -173,4 +179,16 @@ defmodule Mixpanel do
   @spec convert_ip({1..255, 1..255, 1..255, 1..255}) :: String.t()
   defp convert_ip({a, b, c, d}), do: "#{a}.#{b}.#{c}.#{d}"
   defp convert_ip(ip), do: ip
+
+  @spec validate_options(Keyword.t(), [atom(), ...], String.t() | atom()) ::
+          Keyword.t() | no_return()
+  defp validate_options(options, valid_values, name) do
+    case Keyword.split(options, valid_values) do
+      {options, []} ->
+        options
+
+      {_, illegal_options} ->
+        raise "Unsupported keys(s) in #{name}: #{inspect(Keyword.keys(illegal_options))}"
+    end
+  end
 end
