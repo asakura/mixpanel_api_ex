@@ -22,7 +22,7 @@ jobs:
         otp: [24, 25, 26]
         elixir: [1.15]
     runs-on: ${{matrix.os}}
-    name: OTP ${{matrix.otp}} / Elixir ${{matrix.elixir}} (${{matrix.os}})
+    name: test|OTP ${{matrix.otp}}|Elixir ${{matrix.elixir}}|${{matrix.os}}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -61,7 +61,7 @@ jobs:
         otp: [26]
         elixir: [1.15]
     runs-on: ${{matrix.os}}
-    name: OTP ${{matrix.otp}} / Elixir ${{matrix.elixir}} (${{matrix.os}})
+    name: lint|OTP ${{matrix.otp}}|Elixir ${{matrix.elixir}}|${{matrix.os}}
     steps:
       - uses: actions/checkout@v4
         with:
