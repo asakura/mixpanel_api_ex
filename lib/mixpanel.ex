@@ -11,7 +11,6 @@ defmodule Mixpanel do
     a distinct_id with your events, you can track a given user through funnels
     and distinguish unique users for retention analyses. You should always send
     the same distinct_id when an event is triggered by the same user.
-
   * `:time` - The time an event occurred. If this property is not included in
     your request, Mixpanel will use the time the event arrives at the server.
     If present, the value should be one of:
@@ -19,12 +18,12 @@ defmodule Mixpanel do
     * `DateTime` struct
     * a Unix timestamp (seconds since midnight, January 1st, 1970 - UTC)
     * an Erlang's `:erlang.timestamp()` tuple (`{mega_secs, secs, ms}`,
-    microseconds are not supported)
+      microseconds are not supported)
     * an Erlang's `:calendar.datetime()` tuple (`{{yyyy, mm, dd}, {hh, mm, ss}}`)
   * `:ip` - An IP address string (e.g. "127.0.0.1") associated with the event.
-  This is used for adding geolocation data to events, and should only be
-  required if you are making requests from your backend. If `:ip` is absent,
-  Mixpanel will ignore the IP address of the request.
+    This is used for adding geolocation data to events, and should only be
+    required if you are making requests from your backend. If `:ip` is absent,
+    Mixpanel will ignore the IP address of the request.
   """
   @type track_options :: [
           time:
@@ -51,11 +50,10 @@ defmodule Mixpanel do
 
   ## Arguments
 
-    * `event` - A name for the event
-    * `properties` - A collection of properties associated with this event.
-    * `opts` - See `t:track_options/0` for specific options to pass to this
-      function.
-
+  * `event` - A name for the event
+  * `properties` - A collection of properties associated with this event.
+  * `opts` - See `t:track_options/0` for specific options to pass to this
+    function.
   """
   @spec track(Client.event(), Client.properties(), track_options) :: :ok
   def track(event, properties \\ %{}, opts \\ []) do
