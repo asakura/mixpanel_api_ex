@@ -43,6 +43,20 @@ The package can be installed as:
       active: false
   ```
 
+## EU Data Residency
+
+  ```elixir
+  config :mixpanel_api_ex, :config,
+      base_url: "https://api-eu.mixpanel.com"
+  ```
+
+## Supported HTTP clients
+
+  At the moment `httpc` and `hackney` are supported. `httpc` is default option. To switch to `hackney` specify following in the config:
+  ```elixir
+  config :mixpanel_api_ex, :http_adapter, Mixpanel.HTTP.Hackney
+  ```
+
 ## Usage
 
   1. Track events with `Mixpanel.track/3` function:
@@ -59,6 +73,20 @@ The package can be installed as:
   ```elixir
   iex> Mixpanel.engage("13793", "$set", %{"Address" => "1313 Mockingbird Lane"}, ip: "123.123.123.123")
   :ok
-  iex> Mixpanel.engage("13793", "$set", %{"Address" => "1313 Mockingbird Lane", "Birthday" => "1948-01-01"}, ip: "123.123.123.123")
+  iex> Mixpanel.engage("13793", "$set", %{"Birthday" => "1948-01-01"}, ip: "123.123.123.123")
+  :ok
+  ```
+
+  3. `Mixpanel.engage/2` works with batches:
+
+  ```elixir
+  iex> Mixpanel.engage([{"13793", "$set", %{"Address" => "1313 Mockingbird Lane"}}, {"13793", "$set", %{"Birthday" => "1948-01-01"}}], ip: "123.123.123.123")
+  :ok
+  ```
+
+  4. `Mixpanel.create_alias/2` create an alias for a district ID, merging two profiles:
+
+  ```elixir
+  iex> Mixpanel.create_alias("13793", "13794")
   :ok
   ```
