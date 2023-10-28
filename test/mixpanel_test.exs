@@ -42,7 +42,11 @@ defmodule MixpanelTest do
     setup do
       Mixpanel.HTTP.Mock
       |> expect(:get, fn url, _headers, _opts ->
-        assert url =~ ~r</track$>
+        {:ok, uri} = URI.new(url)
+
+        assert uri.path == "/track"
+        assert uri.query ~> string(starts_with: "data=")
+
         {:ok, 200, [], "1"}
       end)
 
@@ -77,12 +81,16 @@ defmodule MixpanelTest do
   describe "tracks an event with time" do
     setup do
       Mixpanel.HTTP.Mock
-      |> expect(:get, fn url, _headers, opts ->
-        assert url =~ ~r</track$>
-        [data: data] = Keyword.get(opts, :params)
+      |> expect(:get, fn url, _headers, _opts ->
+        {:ok, uri} = URI.new(url)
+
+        assert uri.path == "/track"
+        assert uri.query ~> string(starts_with: "data=")
 
         data =
-          data
+          uri.query
+          |> URI.decode_query()
+          |> then(& &1["data"])
           |> :base64.decode()
           |> Jason.decode!()
 
@@ -131,7 +139,11 @@ defmodule MixpanelTest do
     setup do
       Mixpanel.HTTP.Mock
       |> expect(:get, fn url, _headers, _opts ->
-        assert url =~ ~r</engage$>
+        {:ok, uri} = URI.new(url)
+
+        assert uri.path == "/engage"
+        assert uri.query ~> string(starts_with: "data=")
+
         {:ok, 200, [], "1"}
       end)
 
@@ -163,8 +175,14 @@ defmodule MixpanelTest do
   describe "creates an identity alias" do
     setup do
       Mixpanel.HTTP.Mock
-      |> expect(:post, fn url, _body, _headers, _opts ->
-        assert url =~ ~r</track#identity-create-alias$>
+      |> expect(:post, fn url, body, _headers, _opts ->
+        {:ok, uri} = URI.new(url)
+
+        assert uri.path == "/track"
+        assert uri.fragment == "identity-create-alias"
+        assert uri.query == nil
+        assert body ~> string(starts_with: "data=")
+
         {:ok, 200, [], "1"}
       end)
 
