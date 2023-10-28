@@ -59,7 +59,7 @@ if Code.ensure_loaded?(:httpc) do
              [{:autoredirect, false} | http_opts]
            ) do
         {:ok, {{_, status_code, _}, headers, body}} ->
-          {:ok, status_code, format_headers(headers), body}
+          {:ok, status_code, format_headers(headers), to_string(body)}
       end
     end
 
