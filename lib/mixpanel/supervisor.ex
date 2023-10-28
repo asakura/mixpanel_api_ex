@@ -9,7 +9,7 @@ defmodule Mixpanel.Supervisor do
   def start_link() do
     config = Application.get_env(:mixpanel_api_ex, :config)
 
-    if config[:token] == nil do
+    if config[:project_token] == nil do
       raise ArgumentError, "Please set :mixpanel_api_ex, :token in your app environment's config"
     end
 
