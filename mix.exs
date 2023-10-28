@@ -64,11 +64,7 @@ defmodule Mixpanel.Mixfile do
     ]
   end
 
-  def application(:test) do
-    [mod: {Mixpanel, []}, extra_applications: [:logger, :jason]]
-  end
-
-  def application(_) do
+  def application() do
     [mod: {Mixpanel, []}, extra_applications: [:logger]]
   end
 
