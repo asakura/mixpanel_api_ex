@@ -17,7 +17,7 @@ The package can be installed as:
 
   ```elixir
   def deps do
-    [{:mixpanel_api_ex, "~> 1.1.0"}]
+    [{:mixpanel_api_ex, "~> 1.1.1"}]
   end
   ```
 
