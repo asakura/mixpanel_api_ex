@@ -29,12 +29,11 @@ defmodule MixpanelTest.HTTPTest do
             assert Jason.decode!(body)
                    ~> %{
                      "body" => "",
-                     "headers" =>
-                       list(min: 1, elements: list(min: 2, max: 2, elements: string())),
-                     "http_protocol" => string(starts_with: "HTTP"),
                      "method" => "GET",
                      "query_params" => map(size: 0),
-                     "request_url" => string(ends_with: "/get_endpoint")
+                     "request_headers" =>
+                       list(min: 1, elements: list(min: 2, max: 2, elements: string())),
+                     "request_path" => "/get_endpoint"
                    }
 
           {:ok, status, _headers, _body} ->
@@ -58,12 +57,11 @@ defmodule MixpanelTest.HTTPTest do
             assert Jason.decode!(body)
                    ~> %{
                      "body" => "body",
-                     "headers" =>
-                       list(min: 1, elements: list(min: 2, max: 2, elements: string())),
-                     "http_protocol" => string(starts_with: "HTTP"),
                      "method" => "POST",
                      "query_params" => map(size: 0),
-                     "request_url" => string(ends_with: "/post_endpoint")
+                     "request_headers" =>
+                       list(min: 1, elements: list(min: 2, max: 2, elements: string())),
+                     "request_path" => "/post_endpoint"
                    }
 
           {:ok, status, _headers, _body} ->

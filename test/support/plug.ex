@@ -14,13 +14,11 @@ defmodule MixpanelTest.Plug do
 
     response =
       %{
-        request_url: request_url(conn),
-        http_protocol: get_http_protocol(conn) |> to_string(),
         body: body,
         method: conn.method,
-        headers: conn.req_headers,
-        # body_params: conn.body_params,
-        query_params: conn.query_params
+        query_params: conn.query_params,
+        request_headers: conn.req_headers,
+        request_path: conn.request_path
       }
 
     conn
