@@ -70,7 +70,7 @@ defmodule Mixpanel.Mixfile do
 
   defp deps do
     [
-      {:hackney, "~> 1.20"},
+      {:hackney, "~> 1.20", only: [:test, :dev]},
       {:mox, "~> 1.1", only: :test},
       {:machete, "~> 0.2", only: :test},
       {:bandit, "~> 1.0", only: :test},
