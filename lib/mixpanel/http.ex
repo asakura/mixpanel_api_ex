@@ -58,13 +58,13 @@ defmodule Mixpanel.HTTP do
         ok
 
       other ->
-        attempt = @max_retries - (attempts_left + 1)
+        attempts_left = attempts_left - 1
 
         case other do
           {:ok, status, _headers, _body} ->
             Logger.warning(%{
               message: "Retrying request",
-              attempt: attempt,
+              attempts_left: attempts_left,
               url: url,
               status: status
             })
@@ -72,13 +72,13 @@ defmodule Mixpanel.HTTP do
           {:error, reason} ->
             Logger.warning(%{
               message: "Retrying request",
-              attempt: attempt,
+              attempts_left: attempts_left,
               url: url,
               error: reason
             })
         end
 
-        retry(url, fun, attempts_left - 1)
+        retry(url, fun, attempts_left)
     end
   end
 end
