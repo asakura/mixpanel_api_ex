@@ -36,23 +36,18 @@ if Code.ensure_loaded?(:httpc) do
           _ -> nil
         end
 
-      opts =
+      http_opts =
         opts
-        |> Keyword.split([:params, :insecure])
+        |> Keyword.split([:insecure])
         |> then(fn {opts, _} -> opts end)
         |> Enum.reduce([], fn
-          {:params, value} = params, acc when not is_nil(value) ->
-            [params | acc]
-
           {:insecure, true}, acc ->
             [{:ssl, [{:verify, :verify_none}]} | acc]
         end)
 
-      {params, http_opts} = Keyword.pop(opts, :params, nil)
-
       case do_request(
              method,
-             build_url(url, params),
+             url,
              prepare_headers(headers),
              content_type,
              payload,
@@ -81,14 +76,6 @@ if Code.ensure_loaded?(:httpc) do
       for {key, value} <- headers do
         {to_charlist(key), to_charlist(value)}
       end
-    end
-
-    defp build_url(url, nil) do
-      url
-    end
-
-    defp build_url(url, data: data) do
-      "#{url}?data=#{data}"
     end
   end
 end

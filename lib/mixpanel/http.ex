@@ -25,7 +25,8 @@ defmodule Mixpanel.HTTP do
           | :ignore
   def get(url, headers \\ [], opts \\ []) do
     client = impl()
-    retry(url, fn -> client.get(url, headers, opts) end, @max_retries)
+    {params, opts} = Keyword.pop(opts, :params, nil)
+    retry(url, fn -> client.get(build_url(url, params), headers, opts) end, @max_retries)
   end
 
   @spec post(
@@ -81,4 +82,7 @@ defmodule Mixpanel.HTTP do
         retry(url, fun, attempts_left)
     end
   end
+
+  defp build_url(url, nil), do: url
+  defp build_url(url, data: data), do: "#{url}?#{URI.encode_query(data: data)}"
 end

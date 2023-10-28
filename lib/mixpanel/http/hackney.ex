@@ -42,20 +42,17 @@ if Code.ensure_loaded?(:hackney) do
       request(:post, url, headers, body, opts)
     end
 
-    defp request(method, url, headers, payload, opts) do
+    defp request(method, url, headers, body, opts) do
       opts =
         opts
-        |> Keyword.split([:params, :insecure])
+        |> Keyword.split([:insecure])
         |> then(fn {opts, _} -> opts end)
         |> Enum.reduce([], fn
-          {:params, value} = params, acc when not is_nil(value) ->
-            [params | acc]
-
           {:insecure, true}, acc ->
             [:insecure | acc]
         end)
 
-      case :hackney.request(method, url, headers, payload, opts) do
+      case :hackney.request(method, url, headers, body, opts) do
         {:ok, status_code, headers} ->
           {:ok, status_code, headers, <<>>}
 
