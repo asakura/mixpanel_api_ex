@@ -30,6 +30,7 @@ defmodule MixpanelTest.Plug do
 end
 
 defimpl Jason.Encoder, for: Tuple do
+  @spec encode(tuple, Jason.Encode.opts()) :: iodata | {:error, EncodeError.t() | Exception.t()}
   def encode(data, opts) when is_tuple(data) do
     Jason.Encode.list(Tuple.to_list(data), opts)
   end
