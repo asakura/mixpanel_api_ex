@@ -70,14 +70,16 @@ defmodule Mixpanel.Mixfile do
 
   defp deps do
     [
-      {:hackney, "~> 1.20", only: [:test, :dev]},
-      {:mox, "~> 1.1", only: :test},
-      {:machete, "~> 0.2", only: :test},
       {:bandit, "~> 1.0", only: :test},
-      {:jason, "~> 1.4"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
-      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+      {:gradient_macros, github: "esl/gradient_macros", ref: "3bce214", runtime: false},
+      {:gradient, github: "esl/gradient", ref: "33e13fb", only: [:dev], runtime: false},
+      {:hackney, "~> 1.20", only: [:test, :dev]},
+      {:jason, "~> 1.4"},
+      {:machete, "~> 0.2", only: :test},
+      {:mox, "~> 1.1", only: :test}
     ]
   end
 
