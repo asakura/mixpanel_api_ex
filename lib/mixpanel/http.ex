@@ -47,7 +47,7 @@ defmodule Mixpanel.HTTP do
     Application.get_env(:mixpanel_api_ex, :http_adapter, Mixpanel.HTTP.HTTPC)
   end
 
-  @spec retry(String.t(), (-> {:ok, any, any, any} | {:error, String.t()}), pos_integer) ::
+  @spec retry(String.t(), (-> {:ok, any, any, any} | {:error, String.t()}), non_neg_integer) ::
           {:ok, any, any, any} | :ignore
   defp retry(_url, _fun, 0) do
     :ignore

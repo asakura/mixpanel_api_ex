@@ -12,7 +12,7 @@ defmodule Mixpanel.Client do
   @type active :: boolean
   @type base_url :: String.t()
   @type option :: {:project_token, project_token} | {:active, active} | {:base_url, base_url}
-  @type init_args :: [option | GenServer.option(), ...]
+  @type init_args :: [option | GenServer.option() | {Keyword.key(), Keyword.value()}, ...]
   @type state :: %{
           required(:project_token) => project_token,
           required(:active) => active,
@@ -31,9 +31,18 @@ defmodule Mixpanel.Client do
 
   @spec start_link(init_args) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(init_args) do
+    {opts, gen_server_opts} = split_options(init_args)
+    GenServer.start_link(__MODULE__, opts, gen_server_opts)
+  end
+
+  @spec init(init_args) :: {[option, ...], [GenServer.option(), ...]}
+  defp split_options(init_args) do
     {opts, gen_server_opts} = Keyword.split(init_args, [:project_token, :active, :base_url])
 
-    GenServer.start_link(__MODULE__, opts, gen_server_opts)
+    gen_server_opts =
+      Keyword.take(gen_server_opts, [:debug, :name, :timeout, :spawn_opt, :hibernate_after])
+
+    {opts, gen_server_opts}
   end
 
   @spec child_spec(init_args) :: %{
@@ -41,16 +50,18 @@ defmodule Mixpanel.Client do
           start: {__MODULE__, :start_link, [init_args, ...]}
         }
   def child_spec(init_args) do
-    init_args =
-      init_args
-      |> Keyword.put_new(:name, __MODULE__)
-      |> Keyword.put_new(:base_url, @base_url)
-      |> Keyword.put_new(:active, true)
-
     %{
       id: __MODULE__,
-      start: {__MODULE__, :start_link, [init_args]}
+      start: {__MODULE__, :start_link, [put_default_opts(init_args)]}
     }
+  end
+
+  @spec put_default_opts(init_args) :: init_args
+  defp put_default_opts(init_args) do
+    init_args
+    |> Keyword.put_new(:name, __MODULE__)
+    |> Keyword.put_new(:base_url, @base_url)
+    |> Keyword.put_new(:active, true)
   end
 
   @doc """

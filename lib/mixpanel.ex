@@ -59,6 +59,8 @@ defmodule Mixpanel do
               ignore_time: boolean
             ]
 
+  @epoch :calendar.datetime_to_gregorian_seconds({{1970, 1, 1}, {0, 0, 0}})
+
   @moduledoc """
   Elixir client for the Mixpanel API.
   """
@@ -162,8 +164,8 @@ defmodule Mixpanel do
           | NaiveDateTime.t()
           | :erlang.timestamp()
           | :calendar.datetime()
-          | pos_integer()
-        ) :: nil | non_neg_integer
+          | pos_integer
+        ) :: nil | integer
   defp to_timestamp(nil), do: nil
 
   defp to_timestamp(secs) when is_integer(secs),
@@ -179,14 +181,15 @@ defmodule Mixpanel do
     do:
       dt
       |> :calendar.datetime_to_gregorian_seconds()
-      |> Kernel.-(unquote(:calendar.datetime_to_gregorian_seconds({{1970, 1, 1}, {0, 0, 0}})))
+      |> Kernel.-(@epoch)
 
   defp to_timestamp({mega_secs, secs, _ms}),
     do: trunc(mega_secs * 1_000_000 + secs)
 
-  @spec convert_ip({1..255, 1..255, 1..255, 1..255}) :: String.t()
+  @spec convert_ip(nil | {1..255, 1..255, 1..255, 1..255} | String.t()) :: nil | String.t()
   defp convert_ip({a, b, c, d}), do: "#{a}.#{b}.#{c}.#{d}"
-  defp convert_ip(ip), do: ip
+  defp convert_ip(ip) when is_binary(ip), do: ip
+  defp convert_ip(nil), do: nil
 
   @dialyzer {:nowarn_function, maybe_put: 3}
 
