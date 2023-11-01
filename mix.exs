@@ -29,7 +29,7 @@ defmodule Mixpanel.Mixfile do
       ],
       test_coverage: [
         summary: [
-          threshold: 70
+          threshold: 80
         ]
       ],
 
