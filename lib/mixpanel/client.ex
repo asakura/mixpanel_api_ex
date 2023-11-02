@@ -12,7 +12,6 @@ defmodule Mixpanel.Client do
 
   @type option ::
           {:project_token, State.project_token()}
-          | {:active, State.active()}
           | {:base_url, State.base_url()}
           | {:http_adapter, module}
   @type init_args :: [option | GenServer.option() | {Keyword.key(), Keyword.value()}, ...]
@@ -37,7 +36,7 @@ defmodule Mixpanel.Client do
   @spec init(init_args) :: {[option, ...], [GenServer.option(), ...]}
   defp split_options(init_args) do
     {opts, gen_server_opts} =
-      Keyword.split(init_args, [:project_token, :active, :base_url, :http_adapter])
+      Keyword.split(init_args, [:project_token, :base_url, :http_adapter])
 
     gen_server_opts =
       Keyword.take(gen_server_opts, [:debug, :name, :timeout, :spawn_opt, :hibernate_after])
@@ -61,7 +60,6 @@ defmodule Mixpanel.Client do
     init_args
     |> Keyword.put_new(:name, __MODULE__)
     |> Keyword.put_new(:base_url, @base_url)
-    |> Keyword.put_new(:active, true)
     |> Keyword.put_new(:http_adapter, HTTP.HTTPC)
   end
 
@@ -128,7 +126,7 @@ defmodule Mixpanel.Client do
   @impl GenServer
   def handle_cast(
         {:track, event, properties},
-        %State{project_token: project_token, http_adapter: http_adapter, active: true} = state
+        %State{project_token: project_token, http_adapter: http_adapter} = state
       ) do
     data = encode_params(%{event: event, properties: Map.put(properties, :token, project_token)})
 
@@ -146,7 +144,7 @@ defmodule Mixpanel.Client do
   @impl GenServer
   def handle_cast(
         {:engage, event},
-        %State{project_token: project_token, http_adapter: http_adapter, active: true} = state
+        %State{project_token: project_token, http_adapter: http_adapter} = state
       ) do
     data =
       event
@@ -167,7 +165,7 @@ defmodule Mixpanel.Client do
   @impl GenServer
   def handle_cast(
         {:create_alias, alias, distinct_id},
-        %State{project_token: project_token, http_adapter: http_adapter, active: true} = state
+        %State{project_token: project_token, http_adapter: http_adapter} = state
       ) do
     data =
       %{
@@ -199,11 +197,6 @@ defmodule Mixpanel.Client do
         })
     end
 
-    {:noreply, state}
-  end
-
-  # No events submitted when env configuration is set to false.
-  def handle_cast(_request, %State{active: false} = state) do
     {:noreply, state}
   end
 

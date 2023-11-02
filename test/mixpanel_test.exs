@@ -12,7 +12,6 @@ defmodule MixpanelTest.Test do
       start_supervised!(
         {Mixpanel.Client,
          [
-           active: true,
            project_token: "",
            http_adapter: MixpanelTest.HTTP.Mock,
            name: MixpanelTest

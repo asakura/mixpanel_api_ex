@@ -10,7 +10,6 @@ Application.put_env(:mixpanel_api_ex, :clients, [MixpanelTest])
 
 Application.put_env(:mixpanel_api_ex, MixpanelTest,
   project_token: "token",
-  active: true,
   base_url: "https://api.mixpanel.com",
   http_adapter: MixpanelTest.HTTP.Mock
 )
