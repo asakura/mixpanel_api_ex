@@ -1,4 +1,6 @@
 defmodule Mixpanel.Client.State do
+  @moduledoc false
+
   @type project_token :: String.t()
   @type base_url :: String.t()
 
