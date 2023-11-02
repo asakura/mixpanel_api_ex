@@ -3,7 +3,7 @@ defmodule MixpanelTest.SupervisorTest do
 
   test "start_link/1 with no clients configured" do
     assert {:ok, pid} = Mixpanel.Supervisor.start_link([])
-    Process.exit(pid, :shutdown)
+    Supervisor.stop(pid)
     assert Process.alive?(pid) == false
   end
 end
