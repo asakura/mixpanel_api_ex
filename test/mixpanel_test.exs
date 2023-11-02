@@ -222,4 +222,24 @@ defmodule MixpanelTest.Test do
       :timer.sleep(50)
     end
   end
+
+  test "__using__/1" do
+    ast =
+      quote do
+        use Mixpanel, MixpanelTest
+      end
+
+    assert {:module, _module, _bytecode, _exports} =
+      Module.create(MixpanelTest.Using, ast, Macro.Env.location(__ENV__))
+
+    assert apply(MixpanelTest.Using, :__info__, [:functions]) ~> in_any_order([
+      {:track, 1},
+      {:track, 2},
+      {:track, 3},
+      {:engage, 1},
+      {:engage, 2},
+      {:engage, 3},
+      {:engage, 4},
+      {:create_alias, 2}])
+  end
 end
