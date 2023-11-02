@@ -100,7 +100,14 @@ defmodule Mixpanel do
 
   @spec start(any, any) :: :ignore | {:error, any} | {:ok, pid}
   def start(_type, _args) do
-    Mixpanel.Supervisor.start_link()
+    clients = Application.get_env(:mixpanel_api_ex, :clients, [])
+
+    if not is_list(clients) do
+      raise ArgumentError,
+            "Please set :mixpanel_api_ex, :clients in your app environment's config"
+    end
+
+    Mixpanel.Supervisor.start_link(clients)
   end
 
   @doc """

@@ -5,15 +5,8 @@ defmodule Mixpanel.Supervisor do
   A simple supervisor which manages API Client process alive.
   """
 
-  @spec start_link :: :ignore | {:error, any} | {:ok, pid}
-  def start_link() do
-    clients = Application.get_env(:mixpanel_api_ex, :clients, [])
-
-    if not is_list(clients) do
-      raise ArgumentError,
-            "Please set :mixpanel_api_ex, :clients in your app environment's config"
-    end
-
+  @spec start_link(any) :: :ignore | {:error, any} | {:ok, pid}
+  def start_link(clients) do
     Supervisor.start_link(__MODULE__, clients, name: __MODULE__)
   end
 
