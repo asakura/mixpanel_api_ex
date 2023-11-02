@@ -9,11 +9,12 @@ defmodule Mixpanel do
     {which, _binding} =
       Code.eval_quoted(which_ast, [], file: __CALLER__.file, line: __CALLER__.line)
 
-    clients = Application.get_env(:mixpanel_api_ex, :clients, [])
+    clients =
+      Application.get_env(:mixpanel_api_ex, :clients, [])
 
     if which not in clients do
       raise ArgumentError,
-            "Please set :mixpanel_api_ex, :clients in your app environment's config"
+            "Could not find #{inspect(which)} in :mixpanel_api_ex, :clients in your app environment's config, got #{inspect(clients)}"
     end
 
     quote do
