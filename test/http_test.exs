@@ -21,7 +21,30 @@ defmodule MixpanelTest.HTTPTest do
     :ok
   end
 
-  describe "HTTPoison adapter" do
+  describe "NoOp adapter" do
+    test "get/3" do
+      response =
+        Mixpanel.HTTP.NoOp.get("https://localhost:40010/get_endpoint", [], insecure: true)
+
+      assert response == {:ok, 200, [], "1"}
+    end
+
+    test "post/4" do
+      response =
+        Mixpanel.HTTP.NoOp.post(
+          "https://localhost:40010/post_endpoint",
+          "body",
+          [
+            {"Content-Type", "application/x-www-form-urlencoded"}
+          ],
+          insecure: true
+        )
+
+      assert response == {:ok, 200, [], "1"}
+    end
+  end
+
+  describe "HTTP adapters" do
     for adapter <- [Mixpanel.HTTP.Hackney, Mixpanel.HTTP.HTTPC] do
       test "#{adapter}.get/3" do
         case unquote(adapter).get("https://localhost:40010/get_endpoint", [], insecure: true) do
