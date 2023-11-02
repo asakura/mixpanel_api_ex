@@ -8,6 +8,7 @@ defmodule Mixpanel.Client.State do
           http_adapter: module
         }
 
+  @enforce_keys [:project_token, :base_url, :http_adapter]
   defstruct [:project_token, :base_url, :http_adapter]
 
   def new(opts) do
