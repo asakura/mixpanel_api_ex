@@ -80,7 +80,7 @@ defmodule Mixpanel.Mixfile do
       {:jason, "~> 1.4"},
       {:machete, "~> 0.2", only: :test},
       {:mox, "~> 1.1", only: :test},
-      {:telemetry, "~> 0.4 or ~> 1.0"},
+      {:telemetry, "~> 0.4 or ~> 1.0"}
     ]
   end
 

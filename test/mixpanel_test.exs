@@ -230,16 +230,18 @@ defmodule MixpanelTest.Test do
       end
 
     assert {:module, _module, _bytecode, _exports} =
-      Module.create(MixpanelTest.Using, ast, Macro.Env.location(__ENV__))
+             Module.create(MixpanelTest.Using, ast, Macro.Env.location(__ENV__))
 
-    assert apply(MixpanelTest.Using, :__info__, [:functions]) ~> in_any_order([
-      {:track, 1},
-      {:track, 2},
-      {:track, 3},
-      {:engage, 1},
-      {:engage, 2},
-      {:engage, 3},
-      {:engage, 4},
-      {:create_alias, 2}])
+    assert apply(MixpanelTest.Using, :__info__, [:functions])
+           ~> in_any_order([
+             {:track, 1},
+             {:track, 2},
+             {:track, 3},
+             {:engage, 1},
+             {:engage, 2},
+             {:engage, 3},
+             {:engage, 4},
+             {:create_alias, 2}
+           ])
   end
 end
