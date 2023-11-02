@@ -232,6 +232,7 @@ defmodule MixpanelTest.Test do
     assert {:module, _module, _bytecode, _exports} =
              Module.create(MixpanelTest.Using, ast, Macro.Env.location(__ENV__))
 
+    # credo:disable-for-next-line
     assert apply(MixpanelTest.Using, :__info__, [:functions])
            ~> in_any_order([
              {:track, 1},
