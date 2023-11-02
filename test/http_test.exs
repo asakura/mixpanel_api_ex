@@ -2,6 +2,8 @@ defmodule MixpanelTest.HTTPTest do
   use ExUnit.Case
   use Machete
 
+  alias Mixpanel.HTTP.{Hackney, HTTPC, NoOp}
+
   setup_all do
     child =
       {
@@ -24,14 +26,14 @@ defmodule MixpanelTest.HTTPTest do
   describe "NoOp adapter" do
     test "get/3" do
       response =
-        Mixpanel.HTTP.NoOp.get("https://localhost:40010/get_endpoint", [], insecure: true)
+        NoOp.get("https://localhost:40010/get_endpoint", [], insecure: true)
 
       assert response == {:ok, 200, [], "1"}
     end
 
     test "post/4" do
       response =
-        Mixpanel.HTTP.NoOp.post(
+        NoOp.post(
           "https://localhost:40010/post_endpoint",
           "body",
           [
@@ -45,7 +47,7 @@ defmodule MixpanelTest.HTTPTest do
   end
 
   describe "HTTP adapters" do
-    for adapter <- [Mixpanel.HTTP.Hackney, Mixpanel.HTTP.HTTPC] do
+    for adapter <- [Hackney, HTTPC] do
       test "#{adapter}.get/3" do
         case unquote(adapter).get("https://localhost:40010/get_endpoint", [], insecure: true) do
           {:ok, 200, _headers, body} ->
