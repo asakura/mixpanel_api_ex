@@ -113,7 +113,16 @@ defmodule Mixpanel.Client do
   @impl GenServer
   @spec init([option, ...]) :: {:ok, State.t()}
   def init(opts) do
-    {:ok, State.new(opts)}
+    Process.flag(:trap_exit, true)
+    state = State.new(opts)
+
+    client_span =
+      Mixpanel.Telemetry.start_span(:client, %{}, %{
+        base_url: State.base_url(state),
+        http_adapter: State.http_adapter(state)
+      })
+
+    {:ok, State.attach_span(state, client_span)}
   end
 
   @spec handle_cast(
@@ -199,6 +208,12 @@ defmodule Mixpanel.Client do
 
     {:noreply, state}
   end
+
+  @impl GenServer
+  @spec terminate(reason, State.t()) :: :ok
+        when reason: :normal | :shutdown | {:shutdown, term} | term
+  def terminate(_reason, state),
+    do: Mixpanel.Telemetry.stop_span(State.span(state))
 
   defp put_token(events, project_token) when is_list(events),
     do: Enum.map(events, &put_token(&1, project_token))
