@@ -67,7 +67,7 @@ if Code.ensure_loaded?(:httpc) do
     end
 
     defp format_headers(headers) do
-      for [key, value] <- headers do
+      for {key, value} <- headers do
         {to_string(key), to_string(value)}
       end
     end
