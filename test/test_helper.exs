@@ -4,7 +4,15 @@ for app <- Application.spec(:mixpanel_api_ex, :applications) do
   Application.ensure_all_started(app)
 end
 
-Mox.defmock(Mixpanel.HTTP.Mock, for: Mixpanel.HTTP)
-Application.put_env(:mixpanel_api_ex, :http_adapter, Mixpanel.HTTP.Mock)
+Mox.defmock(MixpanelTest.HTTP.Mock, for: Mixpanel.HTTP)
+
+Application.put_env(:mixpanel_api_ex, :clients, [MixpanelTest])
+
+Application.put_env(:mixpanel_api_ex, MixpanelTest,
+  project_token: "token",
+  active: true,
+  base_url: "https://api.mixpanel.com",
+  http_adapter: MixpanelTest.HTTP.Mock
+)
 
 ExUnit.start()

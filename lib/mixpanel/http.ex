@@ -20,16 +20,21 @@ defmodule Mixpanel.HTTP do
               {:ok, status :: 200..599, headers :: [{String.t(), binary}], body :: term}
               | {:error, String.t()}
 
-  @spec get(url :: String.t(), headers :: [{String.t(), binary}], opts :: keyword) ::
+  @spec get(
+          client :: module,
+          url :: String.t(),
+          headers :: [{String.t(), binary}],
+          opts :: keyword
+        ) ::
           {:ok, status :: 200..599, headers :: [{String.t(), binary}], body :: term}
           | :ignore
-  def get(url, headers \\ [], opts \\ []) do
-    client = impl()
+  def get(client, url, headers \\ [], opts \\ []) do
     {params, opts} = Keyword.pop(opts, :params, nil)
     retry(url, fn -> client.get(build_url(url, params), headers, opts) end, @max_retries)
   end
 
   @spec post(
+          client :: module,
           url :: String.t(),
           payload :: binary,
           headers :: [{String.t(), binary}],
@@ -37,14 +42,8 @@ defmodule Mixpanel.HTTP do
         ) ::
           {:ok, status :: 200..599, headers :: [{String.t(), binary}], body :: term}
           | :ignore
-  def post(url, payload, headers \\ [], opts \\ []) do
-    client = impl()
+  def post(client, url, payload, headers \\ [], opts \\ []) do
     retry(url, fn -> client.post(url, payload, headers, opts) end, @max_retries)
-  end
-
-  @spec impl() :: module
-  def impl() do
-    Application.get_env(:mixpanel_api_ex, :http_adapter, Mixpanel.HTTP.HTTPC)
   end
 
   @spec retry(String.t(), (-> {:ok, any, any, any} | {:error, String.t()}), non_neg_integer) ::

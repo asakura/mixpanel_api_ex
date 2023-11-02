@@ -3,6 +3,40 @@ defmodule Mixpanel do
 
   alias Mixpanel.Client
 
+  @doc false
+  @spec __using__(atom) :: Macro.t()
+  defmacro __using__(which_ast) do
+    {which, _binding} =
+      Code.eval_quoted(which_ast, [], file: __CALLER__.file, line: __CALLER__.line)
+
+    clients = Application.get_env(:mixpanel_api_ex, :clients, [])
+
+    if which not in clients do
+      raise ArgumentError,
+            "Please set :mixpanel_api_ex, :clients in your app environment's config"
+    end
+
+    quote do
+      @behaviour Mixpanel
+
+      @spec track(Client.event(), Client.properties(), Mixpanel.track_options()) :: :ok
+      def track(event, properties \\ %{}, opts \\ []),
+        do: apply(Client, :track, [unquote(which), event, properties, opts])
+
+      @spec engage([{Client.distinct_id(), String.t(), map}], Mixpanel.engage_options()) :: :ok
+      def engage(batch, opts \\ []),
+        do: apply(Client, :engage, [unquote(which), batch, opts])
+
+      @spec engage(Client.distinct_id(), String.t(), map, Mixpanel.engage_options()) :: :ok
+      def engage(distinct_id, operation, value, opts \\ []),
+        do: apply(Client, :engage, [unquote(which), distinct_id, operation, value, opts])
+
+      @spec create_alias(Client.alias_id(), Client.distinct_id()) :: :ok
+      def create_alias(alias_id, distinct_id),
+        do: apply(Client, :create_alias, [unquote(which), alias_id, distinct_id])
+    end
+  end
+
   @typedoc """
   Possible common options to be passed to `Mixpanel.track/3` and `Mixpanel.engage/3`.
 
@@ -59,8 +93,6 @@ defmodule Mixpanel do
               ignore_time: boolean
             ]
 
-  @epoch :calendar.datetime_to_gregorian_seconds({{1970, 1, 1}, {0, 0, 0}})
-
   @moduledoc """
   Elixir client for the Mixpanel API.
   """
@@ -80,19 +112,7 @@ defmodule Mixpanel do
   * `opts` - See `t:track_options/0` for specific options to pass to this
     function.
   """
-  @spec track(Client.event(), Client.properties(), track_options) :: :ok
-  def track(event, properties \\ %{}, opts \\ []) do
-    opts = validate_options(opts, [:distinct_id, :ip, :time], :opts)
-
-    properties =
-      properties
-      |> Map.drop([:distinct_id, :ip, :time])
-      |> maybe_put(:time, to_timestamp(Keyword.get(opts, :time)))
-      |> maybe_put(:distinct_id, Keyword.get(opts, :distinct_id))
-      |> maybe_put(:ip, convert_ip(Keyword.get(opts, :ip)))
-
-    Client.track(event, properties)
-  end
+  @callback track(Client.event(), Client.properties(), track_options) :: :ok
 
   @doc """
   Same as `f:engage/4`, but accepts a list of `{distinct_id, operation, value}`
@@ -104,11 +124,7 @@ defmodule Mixpanel do
   * `opts` - See `t:engage_options/0` for specific options to pass to this
     function.
   """
-  @spec engage([{Client.distinct_id(), String.t(), map}], engage_options) :: :ok
-  def engage([{_, _, _} | _] = batch, opts \\ []) do
-    opts = validate_options(opts, [:ip, :time, :ignore_time], :opts)
-    Client.engage(Enum.map(batch, &build_engage_event(&1, opts)))
-  end
+  @callback engage([{Client.distinct_id(), String.t(), map}], engage_options) :: :ok
 
   @doc """
   Takes a `value` map argument containing names and values of profile
@@ -125,19 +141,7 @@ defmodule Mixpanel do
   * `opts` - See `t:engage_options/0` for specific options to pass to this
     function.
   """
-  @spec engage(Client.distinct_id(), String.t(), map, engage_options) :: :ok
-  def engage(distinct_id, operation, value, opts \\ []) do
-    opts = validate_options(opts, [:ip, :time, :ignore_time], :opts)
-    Client.engage(build_engage_event({distinct_id, operation, value}, opts))
-  end
-
-  defp build_engage_event({distinct_id, operation, value}, opts) do
-    %{"$distinct_id": distinct_id}
-    |> Map.put(operation, value)
-    |> maybe_put(:"$ip", convert_ip(Keyword.get(opts, :ip)))
-    |> maybe_put(:"$time", to_timestamp(Keyword.get(opts, :time)))
-    |> maybe_put(:"$ignore_time", Keyword.get(opts, :ignore_time, nil) == true)
-  end
+  @callback engage(Client.distinct_id(), String.t(), map, engage_options) :: :ok
 
   @doc """
   Creates an alias for a distinct ID, merging two profiles. Mixpanel supports
@@ -153,61 +157,5 @@ defmodule Mixpanel do
   * `distinct_id` - The current ID of the user.
 
   """
-  @spec create_alias(Client.alias_id(), Client.distinct_id()) :: :ok
-  def create_alias(alias_id, distinct_id) do
-    Client.create_alias(alias_id, distinct_id)
-  end
-
-  @spec to_timestamp(
-          nil
-          | DateTime.t()
-          | NaiveDateTime.t()
-          | :erlang.timestamp()
-          | :calendar.datetime()
-          | pos_integer
-        ) :: nil | integer
-  defp to_timestamp(nil), do: nil
-
-  defp to_timestamp(secs) when is_integer(secs),
-    do: secs
-
-  defp to_timestamp(%NaiveDateTime{} = dt),
-    do: dt |> DateTime.from_naive!("Etc/UTC") |> DateTime.to_unix()
-
-  defp to_timestamp(%DateTime{} = dt),
-    do: DateTime.to_unix(dt)
-
-  defp to_timestamp({{_y, _mon, _d}, {_h, _m, _s}} = dt),
-    do:
-      dt
-      |> :calendar.datetime_to_gregorian_seconds()
-      |> Kernel.-(@epoch)
-
-  defp to_timestamp({mega_secs, secs, _ms}),
-    do: trunc(mega_secs * 1_000_000 + secs)
-
-  @spec convert_ip(nil | {1..255, 1..255, 1..255, 1..255} | String.t()) :: nil | String.t()
-  defp convert_ip({a, b, c, d}), do: "#{a}.#{b}.#{c}.#{d}"
-  defp convert_ip(ip) when is_binary(ip), do: ip
-  defp convert_ip(nil), do: nil
-
-  @dialyzer {:nowarn_function, maybe_put: 3}
-
-  @spec maybe_put(map, any, any) :: map
-  defp maybe_put(map, _key, nil), do: map
-  defp maybe_put(map, key, value), do: Map.put(map, key, value)
-
-  @dialyzer {:nowarn_function, validate_options: 3}
-
-  @spec validate_options(Keyword.t(), [atom(), ...], String.t() | atom()) ::
-          Keyword.t() | no_return()
-  defp validate_options(options, valid_values, name) do
-    case Keyword.split(options, valid_values) do
-      {options, []} ->
-        options
-
-      {_, illegal_options} ->
-        raise "Unsupported keys(s) in #{name}: #{inspect(Keyword.keys(illegal_options))}"
-    end
-  end
+  @callback create_alias(Client.alias_id(), Client.distinct_id()) :: :ok
 end

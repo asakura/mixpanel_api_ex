@@ -1,4 +1,4 @@
-defmodule MixpanelTest do
+defmodule MixpanelTest.Test do
   use ExUnit.Case
   use Machete
 
@@ -8,39 +8,48 @@ defmodule MixpanelTest do
   setup :verify_on_exit!
 
   setup do
-    pid = start_supervised!({Mixpanel.Client, [active: true, project_token: ""]})
+    pid =
+      start_supervised!(
+        {Mixpanel.Client,
+         [
+           active: true,
+           project_token: "",
+           http_adapter: MixpanelTest.HTTP.Mock,
+           name: MixpanelTest
+         ]}
+      )
 
-    Mixpanel.HTTP.Mock
+    MixpanelTest.HTTP.Mock
     |> allow(self(), pid)
 
     {:ok, client: pid}
   end
 
   test "retries when HTTP client returns error" do
-    Mixpanel.HTTP.Mock
+    MixpanelTest.HTTP.Mock
     |> expect(:get, 3, fn _url, _headers, _opts ->
       {:error, ""}
     end)
 
     capture_log(fn ->
-      Mixpanel.track("Signed up", %{"Referred By" => "friend"}, distinct_id: "13793")
+      MixpanelTest.track("Signed up", %{"Referred By" => "friend"}, distinct_id: "13793")
       :timer.sleep(50)
     end)
   end
 
   test "retries when API asks to retry later" do
-    Mixpanel.HTTP.Mock
+    MixpanelTest.HTTP.Mock
     |> expect(:get, 3, fn _url, _headers, _opts -> {:ok, 503, [], ""} end)
 
     capture_log(fn ->
-      Mixpanel.track("Signed up", %{"Referred By" => "friend"}, distinct_id: "13793")
+      MixpanelTest.track("Signed up", %{"Referred By" => "friend"}, distinct_id: "13793")
       :timer.sleep(50)
     end)
   end
 
   describe "tracks an event" do
     setup do
-      Mixpanel.HTTP.Mock
+      MixpanelTest.HTTP.Mock
       |> expect(:get, fn url, _headers, _opts ->
         {:ok, uri} = URI.new(url)
 
@@ -54,22 +63,22 @@ defmodule MixpanelTest do
     end
 
     test "track/1" do
-      Mixpanel.track("Signed up")
+      MixpanelTest.track("Signed up")
       :timer.sleep(50)
     end
 
     test "track/2" do
-      Mixpanel.track("Signed up", %{"Referred By" => "friend"})
+      MixpanelTest.track("Signed up", %{"Referred By" => "friend"})
       :timer.sleep(50)
     end
 
     test "track/3" do
-      Mixpanel.track("Signed up", %{"Referred By" => "friend"}, distinct_id: "13793")
+      MixpanelTest.track("Signed up", %{"Referred By" => "friend"}, distinct_id: "13793")
       :timer.sleep(50)
     end
 
     test "track/3 with IP" do
-      Mixpanel.track("Level Complete", %{"Level Number" => 9},
+      MixpanelTest.track("Level Complete", %{"Level Number" => 9},
         distinct_id: "13793",
         ip: "203.0.113.9"
       )
@@ -80,7 +89,7 @@ defmodule MixpanelTest do
 
   describe "tracks an event with time" do
     setup do
-      Mixpanel.HTTP.Mock
+      MixpanelTest.HTTP.Mock
       |> expect(:get, fn url, _headers, _opts ->
         {:ok, uri} = URI.new(url)
 
@@ -110,34 +119,34 @@ defmodule MixpanelTest do
     end
 
     test "track/3 handles NaiveDatetime" do
-      Mixpanel.track("Level Complete", %{}, time: ~N[2013-01-15 00:00:00])
+      MixpanelTest.track("Level Complete", %{}, time: ~N[2013-01-15 00:00:00])
       :timer.sleep(50)
     end
 
     test "track/3 handles Datetime" do
-      Mixpanel.track("Level Complete", %{}, time: ~U[2013-01-15 00:00:00Z])
+      MixpanelTest.track("Level Complete", %{}, time: ~U[2013-01-15 00:00:00Z])
       :timer.sleep(50)
     end
 
     test "track/3 handles Unix timestamps" do
-      Mixpanel.track("Level Complete", %{}, time: 1_358_208_000)
+      MixpanelTest.track("Level Complete", %{}, time: 1_358_208_000)
       :timer.sleep(50)
     end
 
     test "track/3 handles Erlang calendar timestamps" do
-      Mixpanel.track("Level Complete", %{}, time: {{2013, 01, 15}, {00, 00, 00}})
+      MixpanelTest.track("Level Complete", %{}, time: {{2013, 01, 15}, {00, 00, 00}})
       :timer.sleep(50)
     end
 
     test "track/3 handles Erlang timestamps" do
-      Mixpanel.track("Level Complete", %{}, time: {1358, 208_000, 0})
+      MixpanelTest.track("Level Complete", %{}, time: {1358, 208_000, 0})
       :timer.sleep(50)
     end
   end
 
   describe "tracks a profile update" do
     setup do
-      Mixpanel.HTTP.Mock
+      MixpanelTest.HTTP.Mock
       |> expect(:get, fn url, _headers, _opts ->
         {:ok, uri} = URI.new(url)
 
@@ -151,17 +160,17 @@ defmodule MixpanelTest do
     end
 
     # test "engage/2" do
-    #   Mixpanel.engage("13793", "$set")
+    #   MixpanelTest.engage("13793", "$set")
     #   :timer.sleep(50)
     # end
 
     test "engage/3" do
-      Mixpanel.engage("13793", "$set", %{"Address" => "1313 Mockingbird Lane"})
+      MixpanelTest.engage("13793", "$set", %{"Address" => "1313 Mockingbird Lane"})
       :timer.sleep(50)
     end
 
     test "engage/4" do
-      Mixpanel.engage(
+      MixpanelTest.engage(
         "13793",
         "$set",
         %{"Address" => "1313 Mockingbird Lane"},
@@ -174,7 +183,7 @@ defmodule MixpanelTest do
 
   describe "creates an identity alias" do
     setup do
-      Mixpanel.HTTP.Mock
+      MixpanelTest.HTTP.Mock
       |> expect(:post, fn url, body, _headers, _opts ->
         {:ok, uri} = URI.new(url)
 
@@ -190,7 +199,7 @@ defmodule MixpanelTest do
     end
 
     test "create an alias" do
-      Mixpanel.create_alias("13793", "13794")
+      MixpanelTest.create_alias("13793", "13794")
       :timer.sleep(50)
     end
   end
