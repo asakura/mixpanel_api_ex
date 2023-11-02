@@ -22,19 +22,19 @@ defmodule Mixpanel do
 
       @spec track(Client.event(), Client.properties(), Mixpanel.track_options()) :: :ok
       def track(event, properties \\ %{}, opts \\ []),
-        do: apply(Client, :track, [unquote(which), event, properties, opts])
+        do: Client.track(unquote(which), event, properties, opts)
 
       @spec engage([{Client.distinct_id(), String.t(), map}], Mixpanel.engage_options()) :: :ok
       def engage(batch, opts \\ []),
-        do: apply(Client, :engage, [unquote(which), batch, opts])
+        do: Client.engage(unquote(which), batch, opts)
 
       @spec engage(Client.distinct_id(), String.t(), map, Mixpanel.engage_options()) :: :ok
       def engage(distinct_id, operation, value, opts \\ []),
-        do: apply(Client, :engage, [unquote(which), distinct_id, operation, value, opts])
+        do: Client.engage(unquote(which), distinct_id, operation, value, opts)
 
       @spec create_alias(Client.alias_id(), Client.distinct_id()) :: :ok
       def create_alias(alias_id, distinct_id),
-        do: apply(Client, :create_alias, [unquote(which), alias_id, distinct_id])
+        do: Client.create_alias(unquote(which), alias_id, distinct_id)
     end
   end
 
