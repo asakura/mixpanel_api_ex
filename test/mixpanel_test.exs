@@ -76,10 +76,19 @@ defmodule MixpanelTest.Test do
       :timer.sleep(50)
     end
 
-    test "track/3 with IP" do
+    test "track/3 with IP string" do
       MixpanelTest.track("Level Complete", %{"Level Number" => 9},
         distinct_id: "13793",
         ip: "203.0.113.9"
+      )
+
+      :timer.sleep(50)
+    end
+
+    test "track/3 with IP tuple" do
+      MixpanelTest.track("Level Complete", %{"Level Number" => 9},
+        distinct_id: "13793",
+        ip: {203, 0, 113, 9}
       )
 
       :timer.sleep(50)
@@ -168,12 +177,23 @@ defmodule MixpanelTest.Test do
       :timer.sleep(50)
     end
 
-    test "engage/4" do
+    test "engage/4 with IP string" do
       MixpanelTest.engage(
         "13793",
         "$set",
         %{"Address" => "1313 Mockingbird Lane"},
         ip: "123.123.123.123"
+      )
+
+      :timer.sleep(50)
+    end
+
+    test "engage/4 with IP tuple" do
+      MixpanelTest.engage(
+        "13793",
+        "$set",
+        %{"Address" => "1313 Mockingbird Lane"},
+        ip: {123, 123, 123, 123}
       )
 
       :timer.sleep(50)
