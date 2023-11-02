@@ -69,7 +69,7 @@ defmodule Mixpanel.Client do
   See `Mixpanel.track/3`
   """
   @spec track(module, event, properties, Mixpanel.track_options()) :: :ok
-  def track(server, event, properties \\ %{}, opts \\ []) do
+  def track(server, event, properties, opts) do
     opts = validate_options(opts, [:distinct_id, :ip, :time], :opts)
 
     properties =
@@ -89,13 +89,13 @@ defmodule Mixpanel.Client do
   """
   @spec engage(module, [{distinct_id, String.t(), map}], Mixpanel.engage_options()) ::
           :ok
-  def engage(server, [{_, _, _} | _] = batch, opts \\ []) do
+  def engage(server, [{_, _, _} | _] = batch, opts) do
     opts = validate_options(opts, [:ip, :time, :ignore_time], :opts)
     GenServer.cast(server, {:engage, Enum.map(batch, &build_engage_event(&1, opts))})
   end
 
   @spec engage(module, distinct_id, String.t(), map, Mixpanel.engage_options()) :: :ok
-  def engage(server, distinct_id, operation, value, opts \\ []) do
+  def engage(server, distinct_id, operation, value, opts) do
     opts = validate_options(opts, [:ip, :time, :ignore_time], :opts)
     GenServer.cast(server, {:engage, build_engage_event({distinct_id, operation, value}, opts)})
   end
