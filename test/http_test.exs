@@ -14,8 +14,8 @@ defmodule MixpanelTest.HTTPTest do
         port: 40_010,
         cipher_suite: :strong,
         otp_app: :mixpanel_api_ex,
-        certfile: "priv/cert/selfsigned.pem",
-        keyfile: "priv/cert/selfsigned_key.pem"
+        certfile: Path.join(__DIR__, "support/selfsigned.pem"),
+        keyfile: Path.join(__DIR__, "support/selfsigned_key.pem")
       }
 
     start_supervised!(child)
