@@ -10,11 +10,7 @@ defmodule Mixpanel.Client do
   alias Mixpanel.Client.State
   alias Mixpanel.HTTP
 
-  @type option ::
-          {:project_token, State.project_token()}
-          | {:base_url, State.base_url()}
-          | {:http_adapter, module}
-  @type init_args :: [option | GenServer.option() | {Keyword.key(), Keyword.value()}, ...]
+  @type init_args :: [State.option() | GenServer.option() | {Keyword.key(), Keyword.value()}, ...]
 
   @type event :: String.t() | map
   @type properties :: map
@@ -29,19 +25,12 @@ defmodule Mixpanel.Client do
 
   @spec start_link(init_args) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(init_args) do
-    {opts, gen_server_opts} = split_options(init_args)
+    {gen_server_opts, opts} =
+      Keyword.split(init_args, [:debug, :name, :timeout, :spawn_opt, :hibernate_after])
+
+    opts = Keyword.take(opts, [:project_token, :base_url, :http_adapter])
+
     GenServer.start_link(__MODULE__, opts, gen_server_opts)
-  end
-
-  @spec init(init_args) :: {[option, ...], [GenServer.option(), ...]}
-  defp split_options(init_args) do
-    {opts, gen_server_opts} =
-      Keyword.split(init_args, [:project_token, :base_url, :http_adapter])
-
-    gen_server_opts =
-      Keyword.take(gen_server_opts, [:debug, :name, :timeout, :spawn_opt, :hibernate_after])
-
-    {opts, gen_server_opts}
   end
 
   @spec child_spec(init_args) :: %{
@@ -111,15 +100,15 @@ defmodule Mixpanel.Client do
   end
 
   @impl GenServer
-  @spec init([option, ...]) :: {:ok, State.t()}
+  @spec init([State.option(), ...]) :: {:ok, State.t()}
   def init(opts) do
     Process.flag(:trap_exit, true)
     state = State.new(opts)
 
     client_span =
       Mixpanel.Telemetry.start_span(:client, %{}, %{
-        base_url: State.base_url(state),
-        http_adapter: State.http_adapter(state)
+        base_url: state.base_url,
+        http_adapter: state.http_adapter
       })
 
     {:ok, State.attach_span(state, client_span)}
@@ -133,13 +122,11 @@ defmodule Mixpanel.Client do
         ) :: {:noreply, State.t()}
 
   @impl GenServer
-  def handle_cast(
-        {:track, event, properties},
-        %State{project_token: project_token, http_adapter: http_adapter} = state
-      ) do
-    data = encode_params(%{event: event, properties: Map.put(properties, :token, project_token)})
+  def handle_cast({:track, event, properties}, state) do
+    data =
+      encode_params(%{event: event, properties: Map.put(properties, :token, state.project_token)})
 
-    case HTTP.get(http_adapter, state.base_url <> @track_endpoint, [], params: [data: data]) do
+    case HTTP.get(state.http_adapter, state.base_url <> @track_endpoint, [], params: [data: data]) do
       {:ok, _, _, _} ->
         :ok
 
@@ -151,16 +138,15 @@ defmodule Mixpanel.Client do
   end
 
   @impl GenServer
-  def handle_cast(
-        {:engage, event},
-        %State{project_token: project_token, http_adapter: http_adapter} = state
-      ) do
+  def handle_cast({:engage, event}, state) do
     data =
       event
-      |> put_token(project_token)
+      |> put_token(state.project_token)
       |> encode_params()
 
-    case HTTP.get(http_adapter, state.base_url <> @engage_endpoint, [], params: [data: data]) do
+    case HTTP.get(state.http_adapter, state.base_url <> @engage_endpoint, [],
+           params: [data: data]
+         ) do
       {:ok, _, _, _} ->
         :ok
 
@@ -172,15 +158,12 @@ defmodule Mixpanel.Client do
   end
 
   @impl GenServer
-  def handle_cast(
-        {:create_alias, alias, distinct_id},
-        %State{project_token: project_token, http_adapter: http_adapter} = state
-      ) do
+  def handle_cast({:create_alias, alias, distinct_id}, state) do
     data =
       %{
         event: "$create_alias",
         properties: %{
-          token: project_token,
+          token: state.project_token,
           alias: alias,
           distinct_id: distinct_id
         }
@@ -188,7 +171,7 @@ defmodule Mixpanel.Client do
       |> encode_params()
 
     case HTTP.post(
-           http_adapter,
+           state.http_adapter,
            state.base_url <> @alias_endpoint,
            "data=#{data}",
            [
@@ -213,7 +196,7 @@ defmodule Mixpanel.Client do
   @spec terminate(reason, State.t()) :: :ok
         when reason: :normal | :shutdown | {:shutdown, term} | term
   def terminate(_reason, state),
-    do: Mixpanel.Telemetry.stop_span(State.span(state))
+    do: Mixpanel.Telemetry.stop_span(state.span)
 
   defp put_token(events, project_token) when is_list(events),
     do: Enum.map(events, &put_token(&1, project_token))
