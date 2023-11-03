@@ -28,7 +28,10 @@ defmodule Mixpanel.Client do
     {gen_server_opts, opts} =
       Keyword.split(init_args, [:debug, :name, :timeout, :spawn_opt, :hibernate_after])
 
-    opts = Keyword.take(opts, [:project_token, :base_url, :http_adapter])
+    opts =
+      opts
+      |> Keyword.take([:project_token, :base_url, :http_adapter])
+      |> Keyword.put(:name, gen_server_opts[:name])
 
     GenServer.start_link(__MODULE__, opts, gen_server_opts)
   end
@@ -107,6 +110,7 @@ defmodule Mixpanel.Client do
 
     client_span =
       Mixpanel.Telemetry.start_span(:client, %{}, %{
+        name: state.name,
         base_url: state.base_url,
         http_adapter: state.http_adapter
       })
@@ -128,9 +132,30 @@ defmodule Mixpanel.Client do
 
     case HTTP.get(state.http_adapter, state.base_url <> @track_endpoint, [], params: [data: data]) do
       {:ok, _, _, _} ->
+        Mixpanel.Telemetry.untimed_span_event(
+          state.span,
+          :send,
+          %{
+            event: event
+            # payload_size: byte_size(payload)
+          },
+          %{name: state.name}
+        )
+
         :ok
 
-      _ ->
+      {:error, reason} ->
+        Mixpanel.Telemetry.span_event(
+          state.span,
+          :send_error,
+          %{
+            event: event,
+            error: reason
+            # payload_size: byte_size(payload)
+          },
+          %{name: state.name}
+        )
+
         Logger.warning(%{message: "Problem tracking event", event: event, properties: properties})
     end
 
@@ -150,7 +175,7 @@ defmodule Mixpanel.Client do
       {:ok, _, _, _} ->
         :ok
 
-      _ ->
+      {:error, _reason} ->
         Logger.warning(%{message: "Problem tracking profile update", event: event})
     end
 
@@ -181,7 +206,7 @@ defmodule Mixpanel.Client do
       {:ok, _, _, _} ->
         :ok
 
-      :ignore ->
+      {:error, _} ->
         Logger.warning(%{
           message: "Problem creating profile alias",
           alias: alias,
@@ -196,7 +221,7 @@ defmodule Mixpanel.Client do
   @spec terminate(reason, State.t()) :: :ok
         when reason: :normal | :shutdown | {:shutdown, term} | term
   def terminate(_reason, state),
-    do: Mixpanel.Telemetry.stop_span(state.span)
+    do: Mixpanel.Telemetry.stop_span(state.span, %{}, %{name: state.name})
 
   defp put_token(events, project_token) when is_list(events),
     do: Enum.map(events, &put_token(&1, project_token))

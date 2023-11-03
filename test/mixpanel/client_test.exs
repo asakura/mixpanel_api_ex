@@ -7,11 +7,12 @@ defmodule MixpanelTest.ClientTest do
       {:ok, collector_pid} =
         start_supervised({Mixpanel.TelemetryCollector, [[:mixpanel_api_ex, :client, :start]]})
 
-      {:ok, %Mixpanel.Client.State{}} =
+      {:ok, %Mixpanel.Client.State{} = state} =
         Mixpanel.Client.init(
           project_token: "token",
           base_url: "base url",
-          http_adapter: MixpanelTest.NoOp
+          http_adapter: Mixpanel.HTTP.NoOp,
+          name: make_ref()
         )
 
       # We expect a monotonic start time as a measurement in the event.
@@ -20,8 +21,9 @@ defmodule MixpanelTest.ClientTest do
                {[:mixpanel_api_ex, :client, :start], %{monotonic_time: integer()},
                 %{
                   telemetry_span_context: reference(),
+                  name: state.name,
                   base_url: "base url",
-                  http_adapter: MixpanelTest.NoOp
+                  http_adapter: Mixpanel.HTTP.NoOp
                 }}
              ]
     end
@@ -33,7 +35,8 @@ defmodule MixpanelTest.ClientTest do
         Mixpanel.Client.init(
           project_token: "token",
           base_url: "base url",
-          http_adapter: MixpanelTest.NoOp
+          http_adapter: Mixpanel.HTTP.NoOp,
+          name: make_ref()
         )
 
       {:ok, collector_pid} =
@@ -55,6 +58,37 @@ defmodule MixpanelTest.ClientTest do
 
       # The start and stop metadata should be equal.
       assert stop_metadata == state.span.start_metadata
+    end
+  end
+
+  describe "handle_cast/2" do
+    setup do
+      {:ok, state} =
+        Mixpanel.Client.init(
+          project_token: "token",
+          base_url: "base url",
+          http_adapter: Mixpanel.HTTP.NoOp,
+          name: make_ref()
+        )
+
+      {:ok, state: state}
+    end
+
+    test "emits telemetry event with expected timings", %{state: state} do
+      {:ok, collector_pid} =
+        start_supervised({Mixpanel.TelemetryCollector, [[:mixpanel_api_ex, :client, :send]]})
+
+      {:noreply, %Mixpanel.Client.State{}} =
+        Mixpanel.Client.handle_cast({:track, "event", %{}}, state)
+
+      assert Mixpanel.TelemetryCollector.get_events(collector_pid)
+             ~> [
+               {[:mixpanel_api_ex, :client, :send], %{event: "event"},
+                %{
+                  telemetry_span_context: reference(),
+                  name: state.name
+                }}
+             ]
     end
   end
 end

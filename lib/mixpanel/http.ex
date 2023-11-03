@@ -27,7 +27,7 @@ defmodule Mixpanel.HTTP do
           opts :: keyword
         ) ::
           {:ok, status :: 200..599, headers :: [{String.t(), binary}], body :: term}
-          | :ignore
+          | {:error, String.t()}
   def get(client, url, headers, opts) do
     {params, opts} = Keyword.pop(opts, :params, nil)
     retry(url, fn -> client.get(build_url(url, params), headers, opts) end, @max_retries)
@@ -41,15 +41,15 @@ defmodule Mixpanel.HTTP do
           opts :: keyword
         ) ::
           {:ok, status :: 200..599, headers :: [{String.t(), binary}], body :: term}
-          | :ignore
+          | {:error, String.t()}
   def post(client, url, payload, headers, opts \\ []) do
     retry(url, fn -> client.post(url, payload, headers, opts) end, @max_retries)
   end
 
   @spec retry(String.t(), (-> {:ok, any, any, any} | {:error, String.t()}), non_neg_integer) ::
-          {:ok, any, any, any} | :ignore
+          {:ok, any, any, any} | {:error, String.t()}
   defp retry(_url, _fun, 0) do
-    :ignore
+    {:error, "Max retries reached"}
   end
 
   defp retry(url, fun, attempts_left) do
