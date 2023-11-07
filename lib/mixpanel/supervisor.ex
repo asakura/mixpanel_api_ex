@@ -21,9 +21,7 @@ defmodule Mixpanel.Supervisor do
           raise ArgumentError, "Expected :atom as a client name, got #{inspect(client)}"
         end
 
-        config =
-          Application.get_env(:mixpanel_api_ex, client, [])
-          |> Keyword.put(:name, client)
+        config = Mixpanel.Config.client(client)
 
         Supervisor.child_spec({Mixpanel.Client, config}, id: client)
       end

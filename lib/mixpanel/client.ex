@@ -17,7 +17,6 @@ defmodule Mixpanel.Client do
   @type alias_id :: String.t()
   @type distinct_id :: String.t()
 
-  @base_url "https://api.mixpanel.com"
   @track_endpoint "/track"
   @engage_endpoint "/engage"
   @alias_endpoint "/track#identity-create-alias"
@@ -43,16 +42,8 @@ defmodule Mixpanel.Client do
   def child_spec(init_args) do
     %{
       id: __MODULE__,
-      start: {__MODULE__, :start_link, [put_default_opts(init_args)]}
+      start: {__MODULE__, :start_link, [init_args]}
     }
-  end
-
-  @spec put_default_opts(init_args) :: init_args
-  defp put_default_opts(init_args) do
-    init_args
-    |> Keyword.put_new(:name, __MODULE__)
-    |> Keyword.put_new(:base_url, @base_url)
-    |> Keyword.put_new(:http_adapter, HTTP.HTTPC)
   end
 
   @doc """

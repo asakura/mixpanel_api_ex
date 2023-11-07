@@ -10,8 +10,7 @@ defmodule Mixpanel do
     {which, _binding} =
       Code.eval_quoted(which_ast, [], file: __CALLER__.file, line: __CALLER__.line)
 
-    clients =
-      Application.get_env(:mixpanel_api_ex, :clients, [])
+    clients = Mixpanel.Config.clients()
 
     if which not in clients do
       raise ArgumentError,
@@ -102,7 +101,7 @@ defmodule Mixpanel do
   @doc export: true
   @spec start(any, any) :: :ignore | {:error, any} | {:ok, pid}
   def start(_type, _args) do
-    clients = Application.get_env(:mixpanel_api_ex, :clients, [])
+    clients = Mixpanel.Config.clients()
 
     if not is_list(clients) do
       raise ArgumentError,

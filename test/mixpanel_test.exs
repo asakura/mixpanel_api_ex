@@ -12,9 +12,10 @@ defmodule MixpanelTest.Test do
       start_supervised!(
         {Mixpanel.Client,
          [
-           project_token: "",
+           base_url: "http://localhost:4000",
            http_adapter: MixpanelTest.HTTP.Mock,
-           name: MixpanelTest
+           name: MixpanelTest,
+           project_token: ""
          ]}
       )
 
