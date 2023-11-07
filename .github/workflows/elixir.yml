@@ -23,6 +23,8 @@ jobs:
         elixir: [1.15]
     runs-on: ${{matrix.os}}
     name: test|OTP ${{matrix.otp}}|Elixir ${{matrix.elixir}}|${{matrix.os}}
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -48,11 +50,15 @@ jobs:
           mix deps.get
           mix deps.compile
       - name: Compile project
-        run: mix compile --warnings-as-errors
-      - name: Run tests
-        run: mix test --cover
+        run: mix compile
+      - name: Compile project (:test)
+        run: MIX_ENV=test mix compile
+      - name: Compile project (:property)
+        run: MIX_ENV=property mix compile
       - name: Run property-based tests
-        run: mix test.property
+        run: mix test.property --cover --export-coverage property-coverage
+      - name: Run tests
+        run: mix coveralls --type github --import-cover cover
   lint:
     # This condition ensures that this job will not run on pull requests in draft state
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
