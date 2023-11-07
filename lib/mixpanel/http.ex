@@ -42,7 +42,7 @@ defmodule Mixpanel.HTTP do
         ) ::
           {:ok, status :: 200..599, headers :: [{String.t(), binary}], body :: term}
           | {:error, String.t()}
-  def post(client, url, payload, headers, opts \\ []) do
+  def post(client, url, payload, headers, opts) do
     retry(url, fn -> client.post(url, payload, headers, opts) end, @max_retries)
   end
 

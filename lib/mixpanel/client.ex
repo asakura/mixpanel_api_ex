@@ -201,7 +201,8 @@ defmodule Mixpanel.Client do
            "data=#{data}",
            [
              {"Content-Type", "application/x-www-form-urlencoded"}
-           ]
+           ],
+           []
          ) do
       {:ok, _, _, _} ->
         :ok
