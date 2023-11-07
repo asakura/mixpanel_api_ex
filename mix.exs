@@ -113,6 +113,7 @@ defmodule Mixpanel.Mixfile do
       p: :property,
       "test.property": :property,
       coveralls: :test,
+      "coveralls.github": :test,
       "coveralls.detail": :test,
       "coveralls.post": :test,
       "coveralls.html": :test,

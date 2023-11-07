@@ -58,7 +58,7 @@ jobs:
       - name: Run property-based tests
         run: mix test.property --cover --export-coverage property-coverage
       - name: Run tests
-        run: mix coveralls --type github --import-cover cover
+        run: mix coveralls.github --import-cover cover
   lint:
     # This condition ensures that this job will not run on pull requests in draft state
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
