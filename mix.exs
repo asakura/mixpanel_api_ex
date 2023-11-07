@@ -98,4 +98,13 @@ defmodule Mixpanel.Mixfile do
       test: "test --no-start"
     ]
   end
+
+  defp unused() do
+    [
+      ignore: [
+        {:_, :child_spec, :_},
+        {:_, :start_link, :_}
+      ]
+    ]
+  end
 end
