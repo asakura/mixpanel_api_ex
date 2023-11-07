@@ -15,6 +15,7 @@ defmodule Mixpanel.Mixfile do
       unused: unused(),
       deps: deps(),
       aliases: aliases(),
+      preferred_cli_env: preferred_cli_env(),
       dialyzer: [
         plt_core_path: "priv/plts",
         plt_file: {:no_warn, "priv/plts/dialyzer.plt"},
@@ -29,6 +30,8 @@ defmodule Mixpanel.Mixfile do
           "-Wunderspecs"
         ]
       ],
+      propcheck: [counter_examples: "propcheck_counter_examples"],
+      test_paths: test_paths(Mix.env()),
       test_coverage: [
         summary: [
           threshold: 80
@@ -55,7 +58,11 @@ defmodule Mixpanel.Mixfile do
   end
 
   defp elixirc_paths(:test), do: ["test/support", "lib"]
+  defp elixirc_paths(:property), do: ["property/support", "lib"]
   defp elixirc_paths(_), do: ["lib"]
+
+  defp test_paths(:property), do: ["property"]
+  defp test_paths(_), do: ["test"]
 
   def package do
     [
@@ -123,5 +130,21 @@ defmodule Mixpanel.Mixfile do
         {:_, :start_link, :_}
       ]
     ]
+  end
+
+  defp run_property_tests(args) do
+    env = Mix.env()
+    args = if IO.ANSI.enabled?(), do: ["--color" | args], else: ["--no-color" | args]
+    IO.puts("Running tests with `MIX_ENV=#{env}`")
+
+    {_, res} =
+      System.cmd("mix", ["test" | args],
+        into: IO.binstream(:stdio, :line),
+        env: [{"MIX_ENV", to_string(env)}]
+      )
+
+    if res > 0 do
+      System.at_exit(fn _ -> exit({:shutdown, 1}) end)
+    end
   end
 end
