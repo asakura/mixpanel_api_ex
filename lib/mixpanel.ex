@@ -4,6 +4,7 @@ defmodule Mixpanel do
   alias Mixpanel.Client
 
   @doc false
+  @doc export: true
   @spec __using__(atom) :: Macro.t()
   defmacro __using__(which_ast) do
     {which, _binding} =
@@ -98,6 +99,7 @@ defmodule Mixpanel do
   Elixir client for the Mixpanel API.
   """
 
+  @doc export: true
   @spec start(any, any) :: :ignore | {:error, any} | {:ok, pid}
   def start(_type, _args) do
     clients = Application.get_env(:mixpanel_api_ex, :clients, [])

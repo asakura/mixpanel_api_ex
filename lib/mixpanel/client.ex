@@ -60,6 +60,7 @@ defmodule Mixpanel.Client do
 
   See `Mixpanel.track/3`
   """
+  @doc export: true
   @spec track(module, event, properties, Mixpanel.track_options()) :: :ok
   def track(server, event, properties, opts) do
     opts = validate_options(opts, [:distinct_id, :ip, :time], :opts)
@@ -79,6 +80,7 @@ defmodule Mixpanel.Client do
 
   See `Mixpanel.engage/4`.
   """
+  @doc export: true
   @spec engage(module, [{distinct_id, String.t(), map}], Mixpanel.engage_options()) ::
           :ok
   def engage(server, [{_, _, _} | _] = batch, opts) do
@@ -86,6 +88,7 @@ defmodule Mixpanel.Client do
     GenServer.cast(server, {:engage, Enum.map(batch, &build_engage_event(&1, opts))})
   end
 
+  @doc export: true
   @spec engage(module, distinct_id, String.t(), map, Mixpanel.engage_options()) :: :ok
   def engage(server, distinct_id, operation, value, opts) do
     opts = validate_options(opts, [:ip, :time, :ignore_time], :opts)
@@ -97,6 +100,7 @@ defmodule Mixpanel.Client do
 
   See `Mixpanel.create_alias/2`.
   """
+  @doc export: true
   @spec create_alias(module, alias_id, distinct_id) :: :ok
   def create_alias(server, alias_id, distinct_id) do
     GenServer.cast(server, {:create_alias, alias_id, distinct_id})
