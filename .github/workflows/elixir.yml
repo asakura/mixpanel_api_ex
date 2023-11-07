@@ -95,7 +95,7 @@ jobs:
           mix deps.get
           mix deps.compile
       - name: Compile project
-        run: mix compile
+        run: mix compile --warnings-as-errors
       - name: Check for unused dependencies
         run: mix deps.unlock --check-unused
       - name: Check formatting
