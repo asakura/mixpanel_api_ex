@@ -11,6 +11,8 @@ defmodule Mixpanel.Mixfile do
       elixirc_paths: elixirc_paths(Mix.env()),
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
+      compilers: compilers(Mix.env()),
+      unused: unused(),
       deps: deps(),
       aliases: aliases(),
       dialyzer: [
@@ -68,6 +70,12 @@ defmodule Mixpanel.Mixfile do
     [mod: {Mixpanel, []}, extra_applications: [:logger]]
   end
 
+  defp compilers(:dev) do
+    [:unused] ++ Mix.compilers()
+  end
+
+  defp compilers(_), do: Mix.compilers()
+
   defp deps do
     [
       {:bandit, "~> 1.0", only: :test},
@@ -79,6 +87,7 @@ defmodule Mixpanel.Mixfile do
       {:hackney, "~> 1.20", only: [:test, :dev]},
       {:jason, "~> 1.4"},
       {:machete, "~> 0.2", only: :test},
+      {:mix_unused, "~> 0.4.1"},
       {:mox, "~> 1.1", only: :test},
       {:telemetry, "~> 0.4 or ~> 1.0"}
     ]
