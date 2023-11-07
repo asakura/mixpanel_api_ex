@@ -94,6 +94,8 @@ jobs:
         run: mix format --check-formatted
       - name: Check style
         run: mix credo --strict
+      - name: Check compilation cycles
+        run: mix xref graph --format cycles --fail-above 0
       - name: Retrieve PLT cache
         uses: actions/cache@v3
         id: plt-cache
