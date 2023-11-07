@@ -102,7 +102,7 @@ defmodule Mixpanel.Telemetry do
   @doc false
   @spec start_span(span_name, measurements, metadata) :: t
   def start_span(span_name, measurements, metadata) do
-    measurements = Map.put_new_lazy(measurements, :monotonic_time, &monotonic_time/0)
+    measurements = Map.put_new_lazy(measurements, :monotonic_time, &System.monotonic_time/0)
     telemetry_span_context = make_ref()
     metadata = Map.put(metadata, :telemetry_span_context, telemetry_span_context)
     _ = event([span_name, :start], measurements, metadata)
@@ -118,7 +118,7 @@ defmodule Mixpanel.Telemetry do
   @doc false
   @spec stop_span(t, measurements, metadata) :: :ok
   def stop_span(span, measurements \\ %{}, metadata \\ %{}) do
-    measurements = Map.put_new_lazy(measurements, :monotonic_time, &monotonic_time/0)
+    measurements = Map.put_new_lazy(measurements, :monotonic_time, &System.monotonic_time/0)
 
     measurements =
       Map.put(measurements, :duration, measurements[:monotonic_time] - span.start_time)
@@ -131,7 +131,7 @@ defmodule Mixpanel.Telemetry do
   @doc false
   @spec span_event(t, event_name, measurements, metadata) :: :ok
   def span_event(span, name, measurements \\ %{}, metadata \\ %{}) do
-    measurements = Map.put_new_lazy(measurements, :monotonic_time, &monotonic_time/0)
+    measurements = Map.put_new_lazy(measurements, :monotonic_time, &System.monotonic_time/0)
     untimed_span_event(span, name, measurements, metadata)
   end
 
@@ -142,9 +142,6 @@ defmodule Mixpanel.Telemetry do
     metadata = Map.put(metadata, :telemetry_span_context, span.telemetry_span_context)
     event([span.span_name, name], measurements, metadata)
   end
-
-  @spec monotonic_time() :: integer
-  defdelegate monotonic_time, to: System
 
   defp event(suffix, measurements, metadata) do
     :telemetry.execute([@app_name | suffix], measurements, metadata)
