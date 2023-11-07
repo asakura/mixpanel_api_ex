@@ -96,6 +96,8 @@ jobs:
         run: mix credo --strict
       - name: Check compilation cycles
         run: mix xref graph --format cycles --fail-above 0
+      - name: Check unused code
+        run: mix compile.unused --severity warning --warnings-as-errors
       - name: Retrieve PLT cache
         uses: actions/cache@v3
         id: plt-cache
