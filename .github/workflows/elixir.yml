@@ -51,6 +51,8 @@ jobs:
         run: mix compile --warnings-as-errors
       - name: Run tests
         run: mix test --cover
+      - name: Run property-based tests
+        run: mix test.property
   lint:
     # This condition ensures that this job will not run on pull requests in draft state
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
