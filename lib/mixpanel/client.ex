@@ -10,7 +10,10 @@ defmodule Mixpanel.Client do
   alias Mixpanel.Client.State
   alias Mixpanel.HTTP
 
-  @type init_args :: [State.option() | GenServer.option() | {Keyword.key(), Keyword.value()}, ...]
+  @type init_args :: [
+          Mixpanel.Config.option() | GenServer.option() | {Keyword.key(), Keyword.value()},
+          ...
+        ]
 
   @type event :: String.t() | map
   @type properties :: map
@@ -98,7 +101,7 @@ defmodule Mixpanel.Client do
   end
 
   @impl GenServer
-  @spec init([State.option(), ...]) :: {:ok, State.t()}
+  @spec init([Mixpanel.Config.option(), ...]) :: {:ok, State.t()}
   def init(opts) do
     Process.flag(:trap_exit, true)
     state = State.new(opts)

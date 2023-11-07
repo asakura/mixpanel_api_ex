@@ -1,29 +1,18 @@
 defmodule Mixpanel.Client.State do
   @moduledoc false
 
-  @type project_token :: String.t()
-  @type base_url :: String.t()
-  @type http_adapter :: module()
-  @type name :: atom
-
-  @type option ::
-          {:project_token, project_token}
-          | {:base_url, base_url}
-          | {:http_adapter, http_adapter}
-          | {:name, name}
-
   @type t :: %__MODULE__{
-          project_token: project_token,
-          base_url: base_url,
-          http_adapter: http_adapter,
-          name: name,
+          project_token: Mixpanel.Config.project_token(),
+          base_url: Mixpanel.Config.base_url(),
+          http_adapter: Mixpanel.Config.http_adapter(),
+          name: Mixpanel.Config.name(),
           span: nil | Mixpanel.Telemetry.t()
         }
 
   @enforce_keys [:project_token, :base_url, :http_adapter, :name]
   defstruct @enforce_keys ++ [:span]
 
-  @spec new([option, ...]) :: t()
+  @spec new(Mixpanel.Config.options()) :: t()
   def new(opts) do
     project_token = Keyword.fetch!(opts, :project_token)
     base_url = Keyword.fetch!(opts, :base_url)
