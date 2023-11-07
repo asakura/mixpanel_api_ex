@@ -55,6 +55,9 @@ if Code.ensure_loaded?(:httpc) do
            ) do
         {:ok, {{_, status_code, _}, headers, body}} ->
           {:ok, status_code, format_headers(headers), to_string(body)}
+
+        {:error, reason} ->
+          {:error, to_string(reason)}
       end
     end
 

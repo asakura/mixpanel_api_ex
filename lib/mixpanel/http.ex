@@ -69,13 +69,15 @@ defmodule Mixpanel.HTTP do
               status: status
             })
 
-          {:error, reason} ->
+          {:error, reason} = err ->
             Logger.warning(%{
               message: "Retrying request",
               attempts_left: attempts_left,
               url: url,
               error: reason
             })
+
+            err
         end
 
         retry(url, fun, attempts_left)

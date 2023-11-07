@@ -63,15 +63,15 @@ if Code.ensure_loaded?(:hackney) do
             {:ok, body} ->
               {:ok, status_code, headers, body}
 
-            {:error, _reason} = err ->
-              err
+            {:error, reason} ->
+              {:error, to_string(reason)}
           end
 
         {:ok, {:maybe_redirect, _status_code, _headers, _client}} ->
           {:error, "Redirect not supported"}
 
         {:error, reason} ->
-          {:error, reason}
+          {:error, to_string(reason)}
       end
     end
   end
