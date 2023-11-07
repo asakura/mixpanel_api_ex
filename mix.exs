@@ -33,6 +33,9 @@ defmodule Mixpanel.Mixfile do
       propcheck: [counter_examples: "propcheck_counter_examples"],
       test_paths: test_paths(Mix.env()),
       test_coverage: [
+        tool: ExCoveralls,
+        export: "cov",
+        test_task: "test",
         summary: [
           threshold: 80
         ]
@@ -89,6 +92,7 @@ defmodule Mixpanel.Mixfile do
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+      {:excoveralls, "~> 0.18", only: [:test, :property]},
       {:gradient, github: "esl/gradient", ref: "33e13fb", only: [:dev], runtime: false},
       {:gradient_macros, github: "esl/gradient_macros", ref: "3bce214", runtime: false},
       {:hackney, "~> 1.20", only: [:test, :dev]},
@@ -107,7 +111,12 @@ defmodule Mixpanel.Mixfile do
       t: :test,
       ti: :test,
       p: :property,
-      "test.property": :property
+      "test.property": :property,
+      coveralls: :test,
+      "coveralls.detail": :test,
+      "coveralls.post": :test,
+      "coveralls.html": :test,
+      "coveralls.cobertura": :test
     ]
   end
 
