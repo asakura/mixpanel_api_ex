@@ -89,13 +89,30 @@ defmodule Mixpanel.Mixfile do
       {:machete, "~> 0.2", only: :test},
       {:mix_unused, "~> 0.4.1"},
       {:mox, "~> 1.1", only: :test},
+      {:propcheck, "~> 1.4", only: [:property, :dev]},
       {:telemetry, "~> 0.4 or ~> 1.0"}
+    ]
+  end
+
+  defp preferred_cli_env do
+    [
+      c: :dev,
+      t: :test,
+      ti: :test,
+      p: :property,
+      "test.property": :property
     ]
   end
 
   defp aliases() do
     [
-      test: "test --no-start"
+      c: "compile",
+      t: "test --no-start",
+      p: &run_property_tests/1,
+      d: "dialyzer",
+      g: "gradient",
+      test: "test --no-start",
+      "test.property": &run_property_tests/1
     ]
   end
 
