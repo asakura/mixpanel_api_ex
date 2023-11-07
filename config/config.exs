@@ -1,3 +1,5 @@
 import Config
 
-import_config "#{Mix.env()}.exs"
+config = "#{Mix.env()}.exs"
+
+File.exists?("config/#{config}") && import_config(config)
