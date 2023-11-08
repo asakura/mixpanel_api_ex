@@ -21,6 +21,7 @@ defmodule Mixpanel.Mixfile do
         plt_file: {:no_warn, "priv/plts/dialyzer.plt"},
         plt_add_deps: :apps_direct,
         plt_add_apps: [:logger, :inets],
+        plt_ignore_apps: [:mix_unused, :propcheck],
         flags: [
           "-Werror_handling",
           "-Wextra_return",
