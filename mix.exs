@@ -97,7 +97,7 @@ defmodule Mixpanel.Mixfile do
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:excoveralls, "~> 0.18", only: [:test, :property]},
       {:gradient, github: "esl/gradient", ref: "33e13fb", only: [:dev], runtime: false},
-      {:gradient_macros, github: "esl/gradient_macros", ref: "3bce214", runtime: false},
+      # {:gradient_macros, github: "esl/gradient_macros", ref: "3bce214", runtime: false},
       {:hackney, "~> 1.20", only: [:test, :dev]},
       {:jason, "~> 1.4"},
       {:machete, "~> 0.2", only: :test},
