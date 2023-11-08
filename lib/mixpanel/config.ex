@@ -23,7 +23,7 @@ defmodule Mixpanel.Config do
     end
   end
 
-  @spec client(module, keyword) :: options | nil
+  @spec client(module, keyword) :: {module, options} | nil
   defp client(name, opts) when is_atom(name) and is_list(opts) do
     config =
       opts
