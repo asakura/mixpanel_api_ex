@@ -90,6 +90,8 @@ defmodule Mixpanel.Mixfile do
   defp deps do
     [
       {:bandit, "~> 1.0", only: :test},
+      # only to make excoveralls to work on OTP 24
+      {:castore, "~> 1.0", only: :test},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
