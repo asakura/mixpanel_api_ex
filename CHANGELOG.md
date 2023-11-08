@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.2.0
+
+### Breaking changes
+
+* Now you can configure the library in a such a way that it can be used to
+  stream to multiple Mixpanel accounts simultaneously. Consult with README.md on
+  how to use new API.
+
+### Improvements
+
+* Introduces Telemetry support.
+
 ## 1.1.0
 
 ### Improvements
