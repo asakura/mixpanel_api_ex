@@ -5,11 +5,9 @@ defmodule Mixpanel do
 
   @doc false
   @doc export: true
-  @spec __using__(atom) :: Macro.t()
-  defmacro __using__(which_ast) do
-    {which, _binding} =
-      Code.eval_quoted(which_ast, [], file: __CALLER__.file, line: __CALLER__.line)
-
+  @spec __using__(any) :: Macro.t()
+  defmacro __using__(_) do
+    which = __CALLER__.module
     clients = Mixpanel.Config.clients()
 
     if which not in clients do

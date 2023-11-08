@@ -227,7 +227,7 @@ defmodule MixpanelTest.Test do
   test "__using__/1" do
     ast =
       quote do
-        use Mixpanel, MixpanelTest
+        use Mixpanel
       end
 
     assert {:module, _module, _bytecode, _exports} =
