@@ -1,7 +1,5 @@
 import Config
 
-config :mixpanel_api_ex, :clients, [MixpanelTest, MixpanelTest.Using]
-
 config :mixpanel_api_ex, MixpanelTest,
   project_token: "token",
   base_url: "https://api.mixpanel.com",

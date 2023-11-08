@@ -16,13 +16,7 @@ defmodule Mixpanel.Supervisor do
             [Supervisor.child_spec() | (old_erlang_child_spec :: :supervisor.child_spec())]}}
   def init(clients) do
     children =
-      for client <- clients do
-        if not is_atom(client) do
-          raise ArgumentError, "Expected :atom as a client name, got #{inspect(client)}"
-        end
-
-        config = Mixpanel.Config.client(client)
-
+      for {client, config} <- clients do
         Supervisor.child_spec({Mixpanel.Client, config}, id: client)
       end
 

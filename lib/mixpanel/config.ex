@@ -18,14 +18,24 @@ defmodule Mixpanel.Config do
 
   @spec clients() :: [name]
   def clients() do
-    Application.get_env(:mixpanel_api_ex, :clients, [])
+    for {name, config} <- Application.get_all_env(:mixpanel_api_ex) do
+      client(name, config)
+    end
   end
 
-  @spec client(name) :: options
-  def client(name) do
-    Application.get_env(:mixpanel_api_ex, name, [])
-    |> Keyword.put_new(:name, name)
-    |> Keyword.put_new(:base_url, @base_url)
-    |> Keyword.put_new(:http_adapter, HTTP.HTTPC)
+  @spec client(module, keyword) :: options | nil
+  defp client(name, opts) when is_atom(name) and is_list(opts) do
+    config =
+      opts
+      |> Keyword.put_new(:name, name)
+      |> Keyword.put_new(:base_url, @base_url)
+      |> Keyword.put_new(:http_adapter, HTTP.HTTPC)
+
+    {name, config}
   end
+
+  defp client(name, _) when not is_atom(name),
+    do: raise(ArgumentError, "Expected a module name as a client name, got #{inspect(name)}")
+
+  defp client(_, _), do: nil
 end

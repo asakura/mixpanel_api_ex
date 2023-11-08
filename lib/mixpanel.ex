@@ -7,32 +7,24 @@ defmodule Mixpanel do
   @doc export: true
   @spec __using__(any) :: Macro.t()
   defmacro __using__(_) do
-    which = __CALLER__.module
-    clients = Mixpanel.Config.clients()
-
-    if which not in clients do
-      raise ArgumentError,
-            "Could not find #{inspect(which)} in :mixpanel_api_ex, :clients in your app environment's config, got #{inspect(clients)}"
-    end
-
     quote do
       @behaviour Mixpanel
 
       @spec track(Client.event(), Client.properties(), Mixpanel.track_options()) :: :ok
       def track(event, properties \\ %{}, opts \\ []),
-        do: Client.track(unquote(which), event, properties, opts)
+        do: Client.track(unquote(__CALLER__.module), event, properties, opts)
 
       @spec engage([{Client.distinct_id(), String.t(), map}], Mixpanel.engage_options()) :: :ok
       def engage(batch, opts \\ []),
-        do: Client.engage(unquote(which), batch, opts)
+        do: Client.engage(unquote(__CALLER__.module), batch, opts)
 
       @spec engage(Client.distinct_id(), String.t(), map, Mixpanel.engage_options()) :: :ok
       def engage(distinct_id, operation, value, opts \\ []),
-        do: Client.engage(unquote(which), distinct_id, operation, value, opts)
+        do: Client.engage(unquote(__CALLER__.module), distinct_id, operation, value, opts)
 
       @spec create_alias(Client.alias_id(), Client.distinct_id()) :: :ok
       def create_alias(alias_id, distinct_id),
-        do: Client.create_alias(unquote(which), alias_id, distinct_id)
+        do: Client.create_alias(unquote(__CALLER__.module), alias_id, distinct_id)
     end
   end
 
@@ -100,12 +92,6 @@ defmodule Mixpanel do
   @spec start(any, any) :: :ignore | {:error, any} | {:ok, pid}
   def start(_type, _args) do
     clients = Mixpanel.Config.clients()
-
-    if not is_list(clients) do
-      raise ArgumentError,
-            "Please set :mixpanel_api_ex, :clients in your app environment's config"
-    end
-
     Mixpanel.Supervisor.start_link(clients)
   end
 
