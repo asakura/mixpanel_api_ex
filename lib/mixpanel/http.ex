@@ -48,10 +48,6 @@ defmodule Mixpanel.HTTP do
 
   @spec retry(String.t(), (-> {:ok, any, any, any} | {:error, String.t()}), non_neg_integer) ::
           {:ok, any, any, any} | {:error, String.t()}
-  defp retry(_url, _fun, 0) do
-    {:error, "Max retries reached"}
-  end
-
   defp retry(url, fun, attempts_left) do
     case fun.() do
       {:ok, 200, _headers, "1"} = ok ->
@@ -60,27 +56,34 @@ defmodule Mixpanel.HTTP do
       other ->
         attempts_left = attempts_left - 1
 
-        case other do
-          {:ok, status, _headers, _body} ->
-            Logger.warning(%{
-              message: "Retrying request",
-              attempts_left: attempts_left,
-              url: url,
-              status: status
-            })
+        reason =
+          case other do
+            {:ok, status, _headers, _body} ->
+              Logger.warning(%{
+                message: "Retrying request",
+                attempts_left: attempts_left,
+                url: url,
+                http_status: status
+              })
 
-          {:error, reason} = err ->
-            Logger.warning(%{
-              message: "Retrying request",
-              attempts_left: attempts_left,
-              url: url,
-              error: reason
-            })
+              "HTTP #{status}"
 
-            err
+            {:error, reason} ->
+              Logger.warning(%{
+                message: "Won't retry to request due to a client error",
+                attempts_left: attempts_left,
+                url: url,
+                error: reason
+              })
+
+              reason
+          end
+
+        if attempts_left > 0 do
+          retry(url, fun, attempts_left)
+        else
+          {:error, reason}
         end
-
-        retry(url, fun, attempts_left)
     end
   end
 
