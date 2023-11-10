@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.1
+
+* Fixes name of the default HTTP adapter
+
 ## 1.2.0
 
 ### Breaking changes
