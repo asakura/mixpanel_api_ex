@@ -102,7 +102,7 @@ defmodule Mixpanel.Mixfile do
       {:hackney, "~> 1.20", only: [:test, :dev]},
       {:jason, "~> 1.4"},
       {:machete, "~> 0.2", only: :test},
-      {:mix_unused, "~> 0.4.1"},
+      {:mix_unused, "~> 0.4.1", only: :dev},
       {:mox, "~> 1.1", only: :test},
       {:propcheck, "~> 1.4", only: [:property, :dev]},
       {:telemetry, "~> 0.4 or ~> 1.0"}
