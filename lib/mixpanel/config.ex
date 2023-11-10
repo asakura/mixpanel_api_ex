@@ -3,7 +3,7 @@ defmodule Mixpanel.Config do
 
   @type project_token :: String.t()
   @type base_url :: String.t()
-  @type http_adapter :: Mixpanel.HTTP.HTTPC | Mixpanel.HTTP.Hackney
+  @type http_adapter :: Mixpanel.HTTP.HTTPC | Mixpanel.HTTP.Hackney | Mixpanel.HTTP.NoOp
   @type name :: atom
 
   @type option ::
@@ -15,6 +15,7 @@ defmodule Mixpanel.Config do
   @type options :: [option, ...]
 
   @base_url "https://api.mixpanel.com"
+  @known_adapters [Mixpanel.HTTP.HTTPC, Mixpanel.HTTP.Hackney, Mixpanel.HTTP.NoOp]
 
   @spec clients() :: [name]
   def clients() do
@@ -41,8 +42,8 @@ defmodule Mixpanel.Config do
 
   defp client(_, _), do: nil
 
-  defp validate_http_adapter!(Mixpanel.HTTP.HTTPC), do: :ok
-  defp validate_http_adapter!(Mixpanel.HTTP.Hackney), do: :ok
+  defp validate_http_adapter!(adapter) when adapter in @known_adapters,
+    do: :ok
 
   defp validate_http_adapter!(http_adapter),
     do: raise(ArgumentError, "Expected a valid http adapter, got #{inspect(http_adapter)}")
