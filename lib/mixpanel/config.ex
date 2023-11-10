@@ -3,7 +3,7 @@ defmodule Mixpanel.Config do
 
   @type project_token :: String.t()
   @type base_url :: String.t()
-  @type http_adapter :: module()
+  @type http_adapter :: Mixpanel.HTTP.HTTPC | Mixpanel.HTTP.Hackney
   @type name :: atom
 
   @type option ::
@@ -31,6 +31,8 @@ defmodule Mixpanel.Config do
       |> Keyword.put_new(:base_url, @base_url)
       |> Keyword.put_new(:http_adapter, Mixpanel.HTTP.HTTPC)
 
+    validate_http_adapter!(config[:http_adapter])
+
     {name, config}
   end
 
@@ -38,4 +40,10 @@ defmodule Mixpanel.Config do
     do: raise(ArgumentError, "Expected a module name as a client name, got #{inspect(name)}")
 
   defp client(_, _), do: nil
+
+  defp validate_http_adapter!(Mixpanel.HTTP.HTTPC), do: :ok
+  defp validate_http_adapter!(Mixpanel.HTTP.Hackney), do: :ok
+
+  defp validate_http_adapter!(http_adapter),
+    do: raise(ArgumentError, "Expected a valid http adapter, got #{inspect(http_adapter)}")
 end
