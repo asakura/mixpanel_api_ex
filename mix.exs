@@ -2,7 +2,7 @@ defmodule Mixpanel.Mixfile do
   use Mix.Project
 
   @external_resource "VERSION"
-  @version File.read!("VERSION")
+  @version File.read!(Path.join([__DIR__, "VERSION"]))
 
   def project do
     [
@@ -74,7 +74,7 @@ defmodule Mixpanel.Mixfile do
       maintainers: ["Mikalai Seva"],
       licenses: ["MIT"],
       links: %{"GitHub" => "https://github.com/asakura/mixpanel_api_ex"},
-      files: ~w(mix.exs README.md CHANGELOG.md lib)
+      files: ~w(mix.exs README.md CHANGELOG.md lib VERSION)
     ]
   end
 

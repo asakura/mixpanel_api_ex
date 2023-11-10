@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.2
+
+* Add VERSION to list of the package's extra files
+
 ## 1.2.1
 
 * Fixes name of the default HTTP adapter
