@@ -29,7 +29,7 @@ defmodule Mixpanel.Config do
       opts
       |> Keyword.put_new(:name, name)
       |> Keyword.put_new(:base_url, @base_url)
-      |> Keyword.put_new(:http_adapter, HTTP.HTTPC)
+      |> Keyword.put_new(:http_adapter, Mixpanel.HTTP.HTTPC)
 
     {name, config}
   end
