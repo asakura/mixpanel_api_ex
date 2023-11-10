@@ -1,7 +1,8 @@
 defmodule Mixpanel.Mixfile do
   use Mix.Project
 
-  @version "1.2.0"
+  @external_resource "VERSION"
+  @version File.read!("VERSION")
 
   def project do
     [
