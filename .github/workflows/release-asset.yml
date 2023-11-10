@@ -1,0 +1,71 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Create draft release
+    runs-on: ubuntu-22.04
+    outputs:
+      upload_url: ${{steps.create_release.outputs.upload_url}}
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: true
+          prerelease: ${{ contains(github.ref, '-rc.') }}
+  build:
+    name: Build and publish release asset
+    runs-on: ubuntu-22.04
+    needs: release
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{env.BRANCH}}
+      - name: Validate version
+        run: |
+          VERSION="$(cat ./VERSION)"
+          if [[ "$GITHUB_REF_NAME" != "v$VERSION" ]]; then
+              echo "VERSION $VERSION does not match commit tag $GITHUB_REF_NAME"
+              exit 1
+          fi
+      - uses: erlef/setup-beam@v1.16.0
+        with:
+          elixir-version: 1.15
+          otp-version: 26
+      - name: Retrieve mix dependencies cache
+        uses: actions/cache@v3
+        id: mix-cache
+        with:
+          path: |
+            deps
+            _build
+          key: test-ubuntu-22.04-26-1.15-${{ hashFiles('**/mix.lock') }}
+          restore-keys: test-ubuntu-22.04-26-1.15-
+      - name: Install Dependencies
+        if: steps.mix-cache.outputs.cache-hit != 'true'
+        run: |
+          mix deps.get
+          mix deps.compile
+      - name: Compile project
+        run: mix compile
+      - name: Build release
+        run: |
+          mix hex.build -o ./release
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.release.outputs.upload_url }}
+          asset_path: ./release
+          asset_name: mixpanel-api-ex-${{ github.ref_name }}.tar
+          asset_content_type: application/x-tar
