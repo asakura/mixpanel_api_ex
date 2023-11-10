@@ -26,7 +26,7 @@ Add `mixpanel_api_ex` to your list of dependencies in `mix.exs`.
 ```elixir
 def deps do
   [
-    {:mixpanel_api_ex, "~> 1.2.0"},
+    {:mixpanel_api_ex, "~> 1.2"},
 
     # optional, but recommended adapter
     {:hackney, "~> 1.20"}
