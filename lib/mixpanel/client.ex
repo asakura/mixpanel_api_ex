@@ -126,7 +126,10 @@ defmodule Mixpanel.Client do
   @impl GenServer
   def handle_cast({:track, event, properties}, state) do
     data =
-      encode_params(%{event: event, properties: Map.put(properties, :token, state.project_token)})
+      encode_params(%{
+        event: event,
+        properties: Map.put_new(properties, :token, state.project_token)
+      })
 
     case HTTP.get(state.http_adapter, state.base_url <> @track_endpoint, [], params: [data: data]) do
       {:ok, _, _, _} ->
