@@ -52,7 +52,7 @@ defmodule Mixpanel do
             | :erlang.timestamp()
             | :calendar.datetime()
             | pos_integer(),
-          ip: {1..255, 0..255, 0..255, 0..255}
+          ip: {1..255, 0..255, 0..255, 0..255} | String.t()
         ]
 
   @typedoc """
