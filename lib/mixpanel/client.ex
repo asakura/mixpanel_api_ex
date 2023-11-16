@@ -57,14 +57,15 @@ defmodule Mixpanel.Client do
   @doc export: true
   @spec track(module, event, properties, Mixpanel.track_options()) :: :ok
   def track(server, event, properties, opts) do
-    opts = validate_options(opts, [:distinct_id, :ip, :time], :opts)
+    opts = validate_options(opts, [:distinct_id, :ip, :time, :token], :opts)
 
     properties =
       properties
-      |> Map.drop([:distinct_id, :ip, :time])
+      |> Map.drop([:distinct_id, :ip, :time, :token])
       |> maybe_put(:time, to_timestamp(Keyword.get(opts, :time)))
       |> maybe_put(:distinct_id, Keyword.get(opts, :distinct_id))
       |> maybe_put(:ip, convert_ip(Keyword.get(opts, :ip)))
+      |> maybe_put(:token, Keyword.get(opts, :token))
 
     GenServer.cast(server, {:track, event, properties})
   end
@@ -126,7 +127,10 @@ defmodule Mixpanel.Client do
   @impl GenServer
   def handle_cast({:track, event, properties}, state) do
     data =
-      encode_params(%{event: event, properties: Map.put(properties, :token, state.project_token)})
+      encode_params(%{
+        event: event,
+        properties: Map.put_new(properties, :token, state.project_token)
+      })
 
     case HTTP.get(state.http_adapter, state.base_url <> @track_endpoint, [], params: [data: data]) do
       {:ok, _, _, _} ->
@@ -167,9 +171,7 @@ defmodule Mixpanel.Client do
       |> put_token(state.project_token)
       |> encode_params()
 
-    case HTTP.get(state.http_adapter, state.base_url <> @engage_endpoint, [],
-           params: [data: data]
-         ) do
+    case HTTP.get(state.http_adapter, state.base_url <> @engage_endpoint, [], params: [data: data]) do
       {:ok, _, _, _} ->
         :ok
 

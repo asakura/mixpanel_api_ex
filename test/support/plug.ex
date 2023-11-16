@@ -12,14 +12,13 @@ defmodule MixpanelTest.Plug do
     {:ok, body, conn} = read_body(conn)
     conn = fetch_query_params(conn)
 
-    response =
-      %{
-        body: body,
-        method: conn.method,
-        query_params: conn.query_params,
-        request_headers: conn.req_headers,
-        request_path: conn.request_path
-      }
+    response = %{
+      body: body,
+      method: conn.method,
+      query_params: conn.query_params,
+      request_headers: conn.req_headers,
+      request_path: conn.request_path
+    }
 
     conn
     |> put_resp_content_type("application/json")

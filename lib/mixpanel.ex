@@ -63,11 +63,14 @@ defmodule Mixpanel do
     a distinct_id with your events, you can track a given user through funnels
     and distinguish unique users for retention analyses. You should always send
     the same distinct_id when an event is triggered by the same user.
+  * `:token` - optional parameter if we want to send events to a different
+    token project.
   """
   @type track_options ::
           common_options
           | [
-              distinct_id: String.t()
+              distinct_id: String.t(),
+              token: String.t()
             ]
 
   @typedoc """

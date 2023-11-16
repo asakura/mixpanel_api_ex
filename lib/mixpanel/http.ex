@@ -46,7 +46,7 @@ defmodule Mixpanel.HTTP do
     retry(url, fn -> client.post(url, payload, headers, opts) end, @max_retries)
   end
 
-  @spec retry(String.t(), (-> {:ok, any, any, any} | {:error, String.t()}), non_neg_integer) ::
+  @spec retry(String.t(), (() -> {:ok, any, any, any} | {:error, String.t()}), non_neg_integer) ::
           {:ok, any, any, any} | {:error, String.t()}
   defp retry(url, fun, attempts_left) do
     case fun.() do

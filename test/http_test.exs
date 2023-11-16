@@ -5,18 +5,17 @@ defmodule MixpanelTest.HTTPTest do
   alias Mixpanel.HTTP.{Hackney, HTTPC, NoOp}
 
   setup_all do
-    child =
-      {
-        Bandit,
-        plug: MixpanelTest.Plug,
-        scheme: :https,
-        ip: :loopback,
-        port: 40_010,
-        cipher_suite: :strong,
-        otp_app: :mixpanel_api_ex,
-        certfile: Path.join(__DIR__, "support/selfsigned.pem"),
-        keyfile: Path.join(__DIR__, "support/selfsigned_key.pem")
-      }
+    child = {
+      Bandit,
+      plug: MixpanelTest.Plug,
+      scheme: :https,
+      ip: :loopback,
+      port: 40_010,
+      cipher_suite: :strong,
+      otp_app: :mixpanel_api_ex,
+      certfile: Path.join(__DIR__, "support/selfsigned.pem"),
+      keyfile: Path.join(__DIR__, "support/selfsigned_key.pem")
+    }
 
     start_supervised!(child)
 
@@ -25,8 +24,7 @@ defmodule MixpanelTest.HTTPTest do
 
   describe "NoOp adapter" do
     test "get/3" do
-      response =
-        NoOp.get("https://localhost:40010/get_endpoint", [], insecure: true)
+      response = NoOp.get("https://localhost:40010/get_endpoint", [], insecure: true)
 
       assert response == {:ok, 200, [], "1"}
     end
