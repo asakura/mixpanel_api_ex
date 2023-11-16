@@ -111,6 +111,7 @@ defmodule Mixpanel do
       iex> Mixpanel.start_client(Mixpanel.Config.client(MyApp.Mixpanel.US, [project_token: "token"]))
       {:error, {:already_started, #PID<0.298.0>}}
   """
+  @doc export: true
   @spec start_client(Mixpanel.Config.options()) :: {:error, any} | {:ok, pid}
   defdelegate start_client(config), to: Mixpanel.Supervisor, as: :start_child
 
@@ -126,6 +127,7 @@ defmodule Mixpanel do
       iex> Process.whereis(MyApp.Mixpanel.EU)
       nil
   """
+  @doc export: true
   @spec terminate_client(Mixpanel.Config.name()) :: :ok | {:error, :not_found}
   defdelegate terminate_client(client), to: Mixpanel.Supervisor, as: :terminate_child
 
