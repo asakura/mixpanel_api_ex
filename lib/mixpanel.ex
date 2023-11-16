@@ -92,8 +92,42 @@ defmodule Mixpanel do
   @spec start(any, any) :: :ignore | {:error, any} | {:ok, pid}
   def start(_type, _args) do
     clients = Mixpanel.Config.clients()
-    Mixpanel.Supervisor.start_link(clients)
+    {:ok, pid} = Mixpanel.Supervisor.start_link()
+
+    for {_client, config} <- clients do
+      {:ok, _pid} = Mixpanel.Supervisor.start_child(config)
+    end
+
+    {:ok, pid}
   end
+
+  @doc """
+  Dynamically starts a new client process.
+
+  ## Examples
+
+      iex> Mixpanel.start_client(Mixpanel.Config.client(MyApp.Mixpanel.US, [project_token: "token"]))
+      {:ok, #PID<0.123.0>}
+      iex> Mixpanel.start_client(Mixpanel.Config.client(MyApp.Mixpanel.US, [project_token: "token"]))
+      {:error, {:already_started, #PID<0.298.0>}}
+  """
+  @spec start_client(Mixpanel.Config.options()) :: {:error, any} | {:ok, pid}
+  defdelegate start_client(config), to: Mixpanel.Supervisor, as: :start_child
+
+  @doc """
+  Stops a client process.
+
+  ## Examples
+
+      iex> Mixpanel.terminate_client(MyApp.Mixpanel.US)
+      :ok
+      iex> Mixpanel.terminate_client(MyApp.Mixpanel.US)
+      {:error, :not_found}
+      iex> Process.whereis(MyApp.Mixpanel.EU)
+      nil
+  """
+  @spec terminate_client(Mixpanel.Config.name()) :: :ok | {:error, :not_found}
+  defdelegate terminate_client(client), to: Mixpanel.Supervisor, as: :terminate_child
 
   @doc """
   Tracks an event.

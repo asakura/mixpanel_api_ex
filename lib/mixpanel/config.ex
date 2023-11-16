@@ -17,15 +17,15 @@ defmodule Mixpanel.Config do
   @base_url "https://api.mixpanel.com"
   @known_adapters [Mixpanel.HTTP.HTTPC, Mixpanel.HTTP.Hackney, Mixpanel.HTTP.NoOp]
 
-  @spec clients() :: [name]
+  @spec clients() :: [{name, options}]
   def clients() do
     for {name, config} <- Application.get_all_env(:mixpanel_api_ex) do
-      client(name, config)
+      {name, client(name, config)}
     end
   end
 
-  @spec client(module, keyword) :: {module, options} | nil
-  defp client(name, opts) when is_atom(name) and is_list(opts) do
+  @spec client(name, keyword) :: options | nil
+  def client(name, opts) when is_atom(name) and is_list(opts) do
     config =
       opts
       |> Keyword.put_new(:name, name)
@@ -34,13 +34,13 @@ defmodule Mixpanel.Config do
 
     validate_http_adapter!(config[:http_adapter])
 
-    {name, config}
+    config
   end
 
-  defp client(name, _) when not is_atom(name),
+  def client(name, _) when not is_atom(name),
     do: raise(ArgumentError, "Expected a module name as a client name, got #{inspect(name)}")
 
-  defp client(_, _), do: nil
+  def client(_, _), do: nil
 
   defp validate_http_adapter!(adapter) when adapter in @known_adapters,
     do: :ok
