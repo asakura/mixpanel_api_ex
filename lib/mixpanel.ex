@@ -3,6 +3,8 @@ defmodule Mixpanel do
 
   alias Mixpanel.Client
 
+  require Logger
+
   @doc false
   @doc export: true
   @spec __using__(any) :: Macro.t()
@@ -94,8 +96,20 @@ defmodule Mixpanel do
     clients = Mixpanel.Config.clients()
     {:ok, pid} = Mixpanel.Supervisor.start_link()
 
-    for {_client, config} <- clients do
-      {:ok, _pid} = Mixpanel.Supervisor.start_child(config)
+    for {client, config} <- clients do
+      case Mixpanel.Supervisor.start_child(config) do
+        {:ok, _pid} ->
+          :ok
+
+        {:ok, _pid, _info} ->
+          :ok
+
+        :ignore ->
+          Logger.warning("#{client} was not started")
+
+        {:error, reason} ->
+          Logger.error("Could not start #{client} because of #{inspect(reason)}")
+      end
     end
 
     {:ok, pid}
