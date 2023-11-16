@@ -1,4 +1,8 @@
 defmodule Mixpanel do
+  @moduledoc """
+  Elixir client for the Mixpanel API.
+  """
+
   use Application
 
   alias Mixpanel.Client
@@ -85,10 +89,6 @@ defmodule Mixpanel do
           | [
               ignore_time: boolean
             ]
-
-  @moduledoc """
-  Elixir client for the Mixpanel API.
-  """
 
   @doc export: true
   @spec start(any, any) :: Supervisor.on_start()
