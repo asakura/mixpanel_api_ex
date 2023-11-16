@@ -10,8 +10,8 @@ defmodule Mixpanel.Supervisor do
   def start_link(_), do: start_link()
 
   @spec start_child(Mixpanel.Config.options()) :: DynamicSupervisor.on_start_child()
-  def start_child(config), do:
-    DynamicSupervisor.start_child(__MODULE__, {Mixpanel.Client, config})
+  def start_child(config),
+    do: DynamicSupervisor.start_child(__MODULE__, {Mixpanel.Client, config})
 
   @doc export: true
   @spec terminate_child(Mixpanel.Config.name()) :: :ok | {:error, :not_found}
