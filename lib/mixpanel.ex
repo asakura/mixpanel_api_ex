@@ -89,7 +89,7 @@ defmodule Mixpanel do
   """
 
   @doc export: true
-  @spec start(any, any) :: :ignore | {:error, any} | {:ok, pid}
+  @spec start(any, any) :: Supervisor.on_start()
   def start(_type, _args) do
     clients = Mixpanel.Config.clients()
     {:ok, pid} = Mixpanel.Supervisor.start_link()
@@ -112,7 +112,7 @@ defmodule Mixpanel do
       {:error, {:already_started, #PID<0.298.0>}}
   """
   @doc export: true
-  @spec start_client(Mixpanel.Config.options()) :: {:error, any} | {:ok, pid}
+  @spec start_client(Mixpanel.Config.options()) :: DynamicSupervisor.on_start_child()
   defdelegate start_client(config), to: Mixpanel.Supervisor, as: :start_child
 
   @doc """

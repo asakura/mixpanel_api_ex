@@ -48,18 +48,19 @@ defmodule Mixpanel.Config do
     |> Keyword.put_new(:name, name)
     |> Keyword.put_new(:base_url, @base_url)
     |> Keyword.put_new(:http_adapter, Mixpanel.HTTP.HTTPC)
-    |> then(&validate_http_adapter!(&1[:http_adapter]))
+    |> validate_http_adapter!()
     |> Keyword.take([:name, :base_url, :http_adapter, :project_token])
   end
 
   def client(name, _) when not is_atom(name),
-    do: raise(ArgumentError, "Expected a module name as a client name, got #{inspect(name)}")
+      do: raise(ArgumentError, "Expected a module name as a client name, got #{inspect(name)}")
 
   def client(_, _), do: nil
 
-  defp validate_http_adapter!(http_adapter) when http_adapter in @known_adapters,
-    do: :ok
-
-  defp validate_http_adapter!(http_adapter),
-    do: raise(ArgumentError, "Expected a valid http adapter, got #{inspect(http_adapter)}")
+  defp validate_http_adapter!(config) do
+    case config[:http_adapter] do
+      http_adapter when http_adapter in @known_adapters -> config
+      http_adapter -> raise(ArgumentError, "Expected a valid http adapter, got #{inspect(http_adapter)}")
+    end
+  end
 end
