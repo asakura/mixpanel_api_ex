@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04]
+        os: [ubuntu-20.04, ubuntu-22.04]
         otp: [23, 24, 25, 26]
         elixir: [1.13, 1.14, 1.15, 1.16.0-rc.0]
         exclude:
@@ -30,6 +30,14 @@ jobs:
             elixir: 1.15
           - otp: 23
             elixir: 1.16.0-rc.0
+          - otp: 23
+            os: ubuntu-22.04
+          - otp: 24
+            os: ubuntu-20.04
+          - otp: 25
+            os: ubuntu-20.04
+          - otp: 26
+            os: ubuntu-20.04
     runs-on: ${{matrix.os}}
     name: test|OTP ${{matrix.otp}}|Elixir ${{matrix.elixir}}|${{matrix.os}}
     env:
