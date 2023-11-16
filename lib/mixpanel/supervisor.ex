@@ -1,9 +1,7 @@
 defmodule Mixpanel.Supervisor do
-  use DynamicSupervisor
+  @moduledoc false
 
-  @moduledoc """
-  A simple supervisor which manages API Client process alive.
-  """
+  use DynamicSupervisor
 
   @spec start_link() :: Supervisor.on_start()
   def start_link(), do: DynamicSupervisor.start_link(__MODULE__, [], name: __MODULE__)
@@ -17,6 +15,7 @@ defmodule Mixpanel.Supervisor do
     DynamicSupervisor.start_child(__MODULE__, {Mixpanel.Client, config})
   end
 
+  @doc export: true
   @spec terminate_child(Mixpanel.Config.name()) :: :ok | {:error, :not_found}
   def terminate_child(client) do
     case Process.whereis(client) do
