@@ -79,7 +79,13 @@ defmodule Mixpanel.Mixfile do
   end
 
   def application() do
-    [mod: {Mixpanel, []}, extra_applications: [:logger]]
+    [
+      mod: {Mixpanel, []},
+      extra_applications: [:logger],
+      start_phases: [
+        clients: []
+      ]
+    ]
   end
 
   defp compilers(:dev) do

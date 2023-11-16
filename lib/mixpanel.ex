@@ -90,13 +90,16 @@ defmodule Mixpanel do
               ignore_time: boolean
             ]
 
-  @doc export: true
+  @impl Application
   @spec start(any, any) :: Supervisor.on_start()
   def start(_type, _args) do
-    clients = Mixpanel.Config.clients()
-    {:ok, pid} = Mixpanel.Supervisor.start_link()
+    Mixpanel.Supervisor.start_link()
+  end
 
-    for {client, config} <- clients do
+  @impl Application
+  @spec start_phase(:clients, :normal, any) :: :ok
+  def start_phase(:clients, :normal, _phase_args) do
+    for {client, config} <- Mixpanel.Config.clients() do
       case Mixpanel.Supervisor.start_child(config) do
         {:ok, _pid} ->
           :ok
@@ -112,8 +115,14 @@ defmodule Mixpanel do
       end
     end
 
-    {:ok, pid}
+    :ok
   end
+
+  @impl Application
+  def prep_stop(state), do: state
+
+  @impl Application
+  def stop(_state), do: :ok
 
   @doc """
   Dynamically starts a new client process.
