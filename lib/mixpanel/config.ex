@@ -1,5 +1,7 @@
 defmodule Mixpanel.Config do
-  @moduledoc false
+  @moduledoc """
+  Module that helps handling configuration values provided by a user.
+  """
 
   @type project_token :: String.t()
   @type base_url :: String.t()
@@ -17,6 +19,7 @@ defmodule Mixpanel.Config do
   @base_url "https://api.mixpanel.com"
   @known_adapters [Mixpanel.HTTP.HTTPC, Mixpanel.HTTP.Hackney, Mixpanel.HTTP.NoOp]
 
+  @doc false
   @spec clients() :: [{name, options}]
   def clients() do
     for {name, config} <- Application.get_all_env(:mixpanel_api_ex) do
@@ -24,17 +27,29 @@ defmodule Mixpanel.Config do
     end
   end
 
-  @spec client(name, keyword) :: options | nil
+  @doc """
+  Helper that validates user provided configuration and substitutes default
+  parameters when needed.
+
+  ## Examples
+
+      iex> Mixpanel.Config.client(MyApp.Mixpanel, [project_token: "token"])
+      [
+        http_adapter: Mixpanel.HTTP.HTTPC,
+        base_url: "https://api.mixpanel.com",
+        name: MyApp.Mixpanel,
+        project_token: "token"
+      ]
+  """
+  @doc export: true
+  @spec client(name, options) :: options | nil
   def client(name, opts) when is_atom(name) and is_list(opts) do
-    config =
-      opts
-      |> Keyword.put_new(:name, name)
-      |> Keyword.put_new(:base_url, @base_url)
-      |> Keyword.put_new(:http_adapter, Mixpanel.HTTP.HTTPC)
-
-    validate_http_adapter!(config[:http_adapter])
-
-    config
+    opts
+    |> Keyword.put_new(:name, name)
+    |> Keyword.put_new(:base_url, @base_url)
+    |> Keyword.put_new(:http_adapter, Mixpanel.HTTP.HTTPC)
+    |> then(&validate_http_adapter!(&1[:http_adapter]))
+    |> Keyword.take([:name, :base_url, :http_adapter, :project_token])
   end
 
   def client(name, _) when not is_atom(name),
@@ -42,7 +57,7 @@ defmodule Mixpanel.Config do
 
   def client(_, _), do: nil
 
-  defp validate_http_adapter!(adapter) when adapter in @known_adapters,
+  defp validate_http_adapter!(http_adapter) when http_adapter in @known_adapters,
     do: :ok
 
   defp validate_http_adapter!(http_adapter),
