@@ -14,12 +14,12 @@ jobs:
     steps:
       - name: Create Release
         id: create_release
-        uses: elgohr/Github-Release-Action@v5
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          name: Release ${{ github.ref }}
           draft: true
           prerelease: ${{ contains(github.ref, '-rc.') }}
   build:
