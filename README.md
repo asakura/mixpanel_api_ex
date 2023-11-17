@@ -81,6 +81,7 @@ MyApp.Mixpanel.track("Signed up", %{"Referred By" => "friend"}, distinct_id: "13
 - [Supported HTTP clients](#supported-http-clients)
 - [Running multiple instances](#running-multiple-instances)
 - [Running tests](#running-tests)
+- [Runtime/Dynamic configuration](#runtime-dynamic-configuration)
 - [Telemetry](#telemetry)
 - [Usage](#usage)
 - [Contributing](#contributing)
@@ -181,6 +182,51 @@ that client won't be started by the application supervisor.
 # config/test.exs
 
 config :mixpanel_api_ex, MyApp.Mixpanel, nil
+```
+
+### Runtime/Dynamic Configuration
+
+In cases when you don't know upfront how many client instances you need and what
+project tokens to use (for instance this information is read from a database or
+a external configuration file during application startup) you can use
+`Mixpanel.start_client/1` and `Mixpanel.terminate_client/1` to manually run and
+kill instances when needed.
+
+For instance this would start `MyApp.Mixpanel.US` named client with `"token"` project token:
+
+```elixir
+Mixpanel.start_client(Mixpanel.Config.client(MyApp.Mixpanel.US, [project_token: "token"])
+# => {:ok, #PID<0.123.0>}
+```
+
+`Mixpanel.Config.client/2` makes sure that provided parameters are correct.
+
+And when you done with it, this function would stop the client immediately:
+
+```elixir
+Mixpanel.terminate_client(MyApp.Mixpanel.US)
+# => :ok
+```
+
+To make it possible to call this client process you might want to use some macro
+magic, which would compile a new module in runtime:
+
+```elixir
+ast =
+  quote do
+    use Mixpanel
+  end
+
+Module.create(MyApp.Mixpanel.US, ast, Macro.Env.location(__ENV__))
+# => {:module, _module, _bytecode, _exports}
+```
+
+If creating a module is not a case, you still can call the client's process
+directly (it's a GenServer after all). For instance:
+
+```elixir
+Client.track(MyApp.Mixpanel.US, event, properties, opts)
+# => :ok
 ```
 
 ## Usage
