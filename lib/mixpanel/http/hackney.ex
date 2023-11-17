@@ -71,7 +71,7 @@ if Code.ensure_loaded?(:hackney) do
           {:error, "Redirect not supported"}
 
         {:error, reason} ->
-          {:error, to_string(reason)}
+          {:error, inspect(reason)}
       end
     end
   end

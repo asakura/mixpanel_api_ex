@@ -47,7 +47,9 @@ if Code.ensure_loaded?(:httpc) do
 
       case do_request(
              method,
-             url,
+             # Erlang 22 comparability layer: httpc wants a charlist as URL
+             # Remove it when OTP 22 support is dropped
+             String.to_charlist(url),
              prepare_headers(headers),
              content_type,
              payload,
@@ -57,7 +59,7 @@ if Code.ensure_loaded?(:httpc) do
           {:ok, status_code, format_headers(headers), to_string(body)}
 
         {:error, reason} ->
-          {:error, to_string(reason)}
+          {:error, inspect(reason)}
       end
     end
 

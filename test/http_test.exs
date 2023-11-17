@@ -4,6 +4,8 @@ defmodule MixpanelTest.HTTPTest do
 
   alias Mixpanel.HTTP.{Hackney, HTTPC, NoOp}
 
+  @base_url "https://localhost:40010"
+
   setup_all do
     child =
       {
@@ -25,8 +27,7 @@ defmodule MixpanelTest.HTTPTest do
 
   describe "NoOp adapter" do
     test "get/3" do
-      response =
-        NoOp.get("https://localhost:40010/get_endpoint", [], insecure: true)
+      response = NoOp.get("#{@base_url}/get_endpoint", [], insecure: true)
 
       assert response == {:ok, 200, [], "1"}
     end
@@ -34,7 +35,7 @@ defmodule MixpanelTest.HTTPTest do
     test "post/4" do
       response =
         NoOp.post(
-          "https://localhost:40010/post_endpoint",
+          "#{@base_url}/post_endpoint",
           "body",
           [
             {"Content-Type", "application/x-www-form-urlencoded"}
@@ -49,7 +50,7 @@ defmodule MixpanelTest.HTTPTest do
   describe "HTTP adapters" do
     for adapter <- [Hackney, HTTPC] do
       test "#{adapter}.get/3" do
-        case unquote(adapter).get("https://localhost:40010/get_endpoint", [], insecure: true) do
+        case unquote(adapter).get("#{@base_url}/get_endpoint", [], insecure: true) do
           {:ok, 200, _headers, body} ->
             assert Jason.decode!(body)
                    ~> %{
@@ -71,7 +72,7 @@ defmodule MixpanelTest.HTTPTest do
 
       test "#{adapter}.post/4" do
         case unquote(adapter).post(
-               "https://localhost:40010/post_endpoint",
+               "#{@base_url}/post_endpoint",
                "body",
                [
                  {"Content-Type", "application/x-www-form-urlencoded"}
