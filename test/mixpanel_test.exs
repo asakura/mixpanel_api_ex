@@ -51,7 +51,7 @@ defmodule MixpanelTest.Test do
     setup do
       MixpanelTest.HTTP.Mock
       |> expect(:get, fn url, _headers, _opts ->
-        {:ok, uri} = URI.new(url)
+        uri = parse(url)
 
         assert uri.path == "/track"
         assert uri.query ~> string(starts_with: "data=")
@@ -100,7 +100,7 @@ defmodule MixpanelTest.Test do
     setup do
       MixpanelTest.HTTP.Mock
       |> expect(:get, fn url, _headers, _opts ->
-        {:ok, uri} = URI.new(url)
+        uri = parse(url)
 
         assert uri.path == "/track"
         assert uri.query ~> string(starts_with: "data=")
@@ -157,7 +157,7 @@ defmodule MixpanelTest.Test do
     setup do
       MixpanelTest.HTTP.Mock
       |> expect(:get, fn url, _headers, _opts ->
-        {:ok, uri} = URI.new(url)
+        uri = parse(url)
 
         assert uri.path == "/engage"
         assert uri.query ~> string(starts_with: "data=")
@@ -205,7 +205,7 @@ defmodule MixpanelTest.Test do
     setup do
       MixpanelTest.HTTP.Mock
       |> expect(:post, fn url, body, _headers, _opts ->
-        {:ok, uri} = URI.new(url)
+        uri = parse(url)
 
         assert uri.path == "/track"
         assert uri.fragment == "identity-create-alias"
@@ -245,5 +245,22 @@ defmodule MixpanelTest.Test do
              {:engage, 4},
              {:create_alias, 2}
            ])
+  end
+
+  # Elixir 1.12 comparability layer
+  # Remove when support for 1.12 is dropped
+  defp parse(uri) do
+    unquote(
+      if function_exported?(URI, :new, 1) do
+        quote do
+          {:ok, uri} = URI.new(var!(uri))
+          uri
+        end
+      else
+        quote do
+          URI.parse(var!(uri))
+        end
+      end
+    )
   end
 end
