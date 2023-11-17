@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.2.4
+
+* Support for Erlang/OTP 22, 23, 24, 25 has been added
+* Elixir 1.12, 1.13, 1.14 are now supported
+* Elixir 1.16.0-rc.0 is supported on OTP 24, 25, 26 as well
+* If a project token present in properties it won't be overwritten
+* Dynamic starting/stopping of client processes was implemented
+
+## 1.2.3
+
+* NoOp was added to the list of known adapters
+* mix_unused was listed as dev only dependency
+
 ## 1.2.2
 
 * Add VERSION to list of the package's extra files
