@@ -91,22 +91,16 @@ jobs:
   lint:
     # This condition ensures that this job will not run on pull requests in draft state
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-22.04]
-        otp: [26]
-        elixir: [1.15]
-    runs-on: ${{matrix.os}}
-    name: lint|OTP ${{matrix.otp}}|Elixir ${{matrix.elixir}}|${{matrix.os}}
+    runs-on: ubuntu-22.04
+    name: lint|OTP 26|Elixir 1.15|ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{env.BRANCH}}
       - uses: erlef/setup-beam@v1.16.0
         with:
-          otp-version: ${{matrix.otp}}
-          elixir-version: ${{matrix.elixir}}
+          otp-version: 26
+          elixir-version: 1.15
       - name: Disable compile warnings
         run: echo "::remove-matcher owner=elixir-mixCompileWarning::"
       - name: Retrieve mix dependencies cache
@@ -116,8 +110,8 @@ jobs:
           path: |
             deps
             _build
-          key: test-${{ matrix.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('**/mix.lock') }}
-          restore-keys: test-${{ matrix.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-
+          key: test-ubuntu-22.04-26-1.15-${{ hashFiles('**/mix.lock') }}
+          restore-keys: test-ubuntu-22.04-26-1.15-
       - name: Install Dependencies
         if: steps.mix-cache.outputs.cache-hit != 'true'
         run: |
@@ -140,8 +134,8 @@ jobs:
         id: plt-cache
         with:
           path: priv/plts
-          key: ${{ matrix.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-plts-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ matrix.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-plts-
+          key: ubuntu-22.04-26-1.15-plts-${{ hashFiles('**/mix.lock') }}
+          restore-keys: ubuntu-22.04-26-1.15-plts-
       - name: Create PLTs
         run: |
           mkdir -p priv/plts
