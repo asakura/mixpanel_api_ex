@@ -103,8 +103,20 @@ defmodule Mixpanel.Mixfile do
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:excoveralls, "~> 0.18", only: [:test, :property]},
-      {:gradient, github: "esl/gradient", ref: "33e13fb", only: [:dev], runtime: false},
-      # {:gradient_macros, github: "esl/gradient_macros", ref: "3bce214", runtime: false},
+      # Erlang 22 comparability layer
+      # Remove it when OTP 22 support is dropped
+      unquote_splicing(
+        if :erlang.system_info(:otp_release) |> to_string() == "22" do
+          []
+        else
+          quote do
+            [
+              {:gradient, github: "esl/gradient", ref: "33e13fb", only: [:dev], runtime: false}
+              # {:gradient_macros, github: "esl/gradient_macros", ref: "3bce214", runtime: false},
+            ]
+          end
+        end
+      ),
       {:hackney, "~> 1.20", only: [:test, :dev]},
       {:jason, "~> 1.4"},
       {:machete, "~> 0.2", only: :test},
