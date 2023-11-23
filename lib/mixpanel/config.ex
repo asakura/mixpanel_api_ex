@@ -29,7 +29,7 @@ defmodule Mixpanel.Config do
 
   @doc """
   Helper that validates user provided configuration and substitutes default
-  parameters when needed.
+  parameters when needed. Raises `ArgumentError` if the configuration is invalid.
 
   ## Examples
 
