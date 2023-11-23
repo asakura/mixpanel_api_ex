@@ -58,6 +58,31 @@ defmodule Mixpanel.Config do
   def client!(_, opts),
     do: raise(ArgumentError, "Expected a list of options, got #{inspect(opts)}")
 
+  @doc """
+  Helper that validates user provided configuration and substitutes default
+  parameters when needed.
+
+  ## Examples
+
+      iex> Mixpanel.Config.client(MyApp.Mixpanel, [project_token: "token"])
+      {:ok,
+       [
+         http_adapter: Mixpanel.HTTP.HTTPC,
+         base_url: "https://api.mixpanel.com",
+         name: MyApp.Mixpanel,
+         project_token: "token"
+       ]}
+  """
+  @doc export: true
+  @spec client(name, options) :: {:ok, options} | {:error, String.t()}
+  def client(name, opts) do
+    {:ok, client!(name, opts)}
+  rescue
+    e in [ArgumentError] ->
+      {:error, Exception.message(e)}
+  end
+
+  @spec validate_http_adapter!(options) :: options | no_return
   defp validate_http_adapter!(config) do
     case config[:http_adapter] do
       http_adapter when http_adapter in @known_adapters ->
