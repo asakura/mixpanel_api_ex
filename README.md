@@ -195,11 +195,11 @@ kill instances when needed.
 For instance this would start `MyApp.Mixpanel.US` named client with `"token"` project token:
 
 ```elixir
-Mixpanel.start_client(Mixpanel.Config.client(MyApp.Mixpanel.US, [project_token: "token"])
+Mixpanel.start_client(Mixpanel.Config.client!(MyApp.Mixpanel.US, [project_token: "token"])
 # => {:ok, #PID<0.123.0>}
 ```
 
-`Mixpanel.Config.client/2` makes sure that provided parameters are correct.
+`Mixpanel.Config.client!/2` makes sure that provided parameters are correct.
 
 And when you done with it, this function would stop the client immediately:
 

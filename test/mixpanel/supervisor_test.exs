@@ -18,22 +18,22 @@ defmodule Mixpanel.SupervisorTest do
     test "start_child/1 starts a client process" do
       assert {:ok, pid} =
                Mixpanel.Supervisor.start_child(
-                 Config.client(__MODULE__.Mixpanel, project_token: "")
+                 Config.client!(__MODULE__.Mixpanel, project_token: "")
                )
 
       assert Process.alive?(pid)
 
       assert {:error, {:already_started, ^pid}} =
                Mixpanel.Supervisor.start_child(
-                 Config.client(__MODULE__.Mixpanel, project_token: "")
+                 Config.client!(__MODULE__.Mixpanel, project_token: "")
                )
 
       assert Process.alive?(pid)
     end
 
     test "terminate_child/1 kills a client process" do
-      Mixpanel.Supervisor.start_child(Config.client(__MODULE__.Mixpanel.A, project_token: ""))
-      Mixpanel.Supervisor.start_child(Config.client(__MODULE__.Mixpanel.B, project_token: ""))
+      Mixpanel.Supervisor.start_child(Config.client!(__MODULE__.Mixpanel.A, project_token: ""))
+      Mixpanel.Supervisor.start_child(Config.client!(__MODULE__.Mixpanel.B, project_token: ""))
 
       assert :ok = Mixpanel.Supervisor.terminate_child(__MODULE__.Mixpanel.A)
 

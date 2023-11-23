@@ -99,7 +99,7 @@ defmodule Mixpanel do
   @impl Application
   @spec start_phase(:clients, :normal, any) :: :ok
   def start_phase(:clients, :normal, _phase_args) do
-    for {client, config} <- Mixpanel.Config.clients() do
+    for {client, config} <- Mixpanel.Config.clients!() do
       case Mixpanel.Supervisor.start_child(config) do
         {:ok, _pid} ->
           :ok
@@ -129,9 +129,9 @@ defmodule Mixpanel do
 
   ## Examples
 
-      iex> Mixpanel.start_client(Mixpanel.Config.client(MyApp.Mixpanel.US, [project_token: "token"]))
+      iex> Mixpanel.start_client(Mixpanel.Config.client!(MyApp.Mixpanel.US, [project_token: "token"]))
       {:ok, #PID<0.123.0>}
-      iex> Mixpanel.start_client(Mixpanel.Config.client(MyApp.Mixpanel.US, [project_token: "token"]))
+      iex> Mixpanel.start_client(Mixpanel.Config.client!(MyApp.Mixpanel.US, [project_token: "token"]))
       {:error, {:already_started, #PID<0.298.0>}}
   """
   @doc export: true

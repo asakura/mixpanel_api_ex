@@ -5,7 +5,7 @@ defmodule Mixpanel.ConfigTest do
   alias Mixpanel.Config
 
   test "client/2 put default options" do
-    assert Config.client(MyApp.Mixpanel, project_token: "token")
+    assert Config.client!(MyApp.Mixpanel, project_token: "token")
            ~> in_any_order([
              {:name, MyApp.Mixpanel},
              {:base_url, "https://api.mixpanel.com"},

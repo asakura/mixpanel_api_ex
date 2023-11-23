@@ -20,10 +20,10 @@ defmodule Mixpanel.Config do
   @known_adapters [Mixpanel.HTTP.HTTPC, Mixpanel.HTTP.Hackney, Mixpanel.HTTP.NoOp]
 
   @doc false
-  @spec clients() :: [{name, options}]
-  def clients() do
+  @spec clients!() :: [{name, options}]
+  def clients!() do
     for {name, config} <- Application.get_all_env(:mixpanel_api_ex) do
-      {name, client(name, config)}
+      {name, client!(name, config)}
     end
   end
 
@@ -33,7 +33,7 @@ defmodule Mixpanel.Config do
 
   ## Examples
 
-      iex> Mixpanel.Config.client(MyApp.Mixpanel, [project_token: "token"])
+      iex> Mixpanel.Config.client!(MyApp.Mixpanel, [project_token: "token"])
       [
         http_adapter: Mixpanel.HTTP.HTTPC,
         base_url: "https://api.mixpanel.com",
@@ -42,8 +42,8 @@ defmodule Mixpanel.Config do
       ]
   """
   @doc export: true
-  @spec client(name, options) :: options | nil
-  def client(name, opts) when is_atom(name) and is_list(opts) do
+  @spec client!(name, options) :: options | no_return
+  def client!(name, opts) when is_atom(name) and is_list(opts) do
     opts
     |> Keyword.put_new(:name, name)
     |> Keyword.put_new(:base_url, @base_url)
@@ -52,10 +52,11 @@ defmodule Mixpanel.Config do
     |> Keyword.take([:name, :base_url, :http_adapter, :project_token])
   end
 
-  def client(name, _) when not is_atom(name),
+  def client!(name, _) when not is_atom(name),
     do: raise(ArgumentError, "Expected a module name as a client name, got #{inspect(name)}")
 
-  def client(_, _), do: nil
+  def client!(_, opts),
+    do: raise(ArgumentError, "Expected a list of options, got #{inspect(opts)}")
 
   defp validate_http_adapter!(config) do
     case config[:http_adapter] do
