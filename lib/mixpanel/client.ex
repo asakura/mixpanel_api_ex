@@ -222,8 +222,15 @@ defmodule Mixpanel.Client do
   @impl GenServer
   @spec terminate(reason, State.t()) :: :ok
         when reason: :normal | :shutdown | {:shutdown, term} | term
-  def terminate(_reason, state),
-    do: Mixpanel.Telemetry.stop_span(state.span, %{}, %{name: state.name})
+  def terminate(_reason, state) do
+    case state.span do
+      span when not is_nil(span) ->
+        Mixpanel.Telemetry.stop_span(span, %{}, %{name: state.name})
+
+      false ->
+        :ok
+    end
+  end
 
   defp put_token(events, project_token) when is_list(events),
     do: Enum.map(events, &put_token(&1, project_token))
