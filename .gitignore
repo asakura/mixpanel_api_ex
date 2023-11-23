@@ -24,3 +24,5 @@ mixpanel_api_ex-*.tar
 
 # Ignore dialyzer caches
 /priv/plts/
+/propcheck_counter_examples
+/.tool-versions
