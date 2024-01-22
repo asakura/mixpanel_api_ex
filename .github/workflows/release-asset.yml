@@ -37,7 +37,7 @@ jobs:
               echo "VERSION $VERSION does not match commit tag $GITHUB_REF_NAME"
               exit 1
           fi
-      - uses: erlef/setup-beam@v1.16.0
+      - uses: erlef/setup-beam@v1.17.1
         with:
           elixir-version: 1.15
           otp-version: 26
