@@ -42,7 +42,10 @@ And ensure that `mixpanel_api_ex` is started before your application:
 
 ```elixir
 def application do
-  [applications: [:mixpanel_api_ex, :my_app]]
+  [
+    ...
+    extra_applications: [:mixpanel_api_ex, ...]
+  ]
 end
 ```
 
