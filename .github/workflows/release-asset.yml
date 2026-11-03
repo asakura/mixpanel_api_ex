@@ -14,7 +14,7 @@ jobs:
     steps:
       - name: Create Release
         id: create_release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v0.1.15
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: release
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           ref: ${{env.BRANCH}}
       - name: Validate version
@@ -37,12 +37,12 @@ jobs:
               echo "VERSION $VERSION does not match commit tag $GITHUB_REF_NAME"
               exit 1
           fi
-      - uses: erlef/setup-beam@v1.17.1
+      - uses: erlef/setup-beam@b60baf47530760859821edca21cbcd3a1bd366cd # v1.17.1
         with:
           elixir-version: 1.15
           otp-version: 26
       - name: Retrieve mix dependencies cache
-        uses: actions/cache@v3
+        uses: actions/cache@6f8efc29b200d32929f49075959781ed54ec270c # v3.5.0
         id: mix-cache
         with:
           path: |
@@ -61,7 +61,7 @@ jobs:
         run: |
           mix hex.build -o ./release
       - name: Upload Release Asset
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v0.1.15
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
